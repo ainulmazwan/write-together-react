@@ -7,7 +7,6 @@ import IconButton from "@mui/material/IconButton";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { Link } from "react-router";
 import { useCookies } from "react-cookie";
-import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 
 export default function Header() {
@@ -47,7 +46,12 @@ export default function Header() {
           ></IconButton>
 
           <MenuBookIcon sx={{ marginRight: 3 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography
+            variant="h6"
+            component={Link}
+            to="/"
+            sx={{ flexGrow: 1, textDecoration: "none", color: "white" }}
+          >
             WriteTogether
           </Typography>
           <Button color="inherit" component={Link} to="/stories">
@@ -58,6 +62,9 @@ export default function Header() {
             <>
               <Button color="inherit" component={Link} to="/stories/new">
                 Create
+              </Button>
+              <Button color="inherit" component={Link} to="/profile">
+                Your Profile
               </Button>
               <Button
                 color="inherit"

@@ -1,4 +1,3 @@
-import React from "react";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
@@ -11,16 +10,27 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Link } from "react-router";
 import Header from "../components/Header";
+import { getStories } from "../utils/api_stories";
+import { useState, useEffect } from "react";
 
 const StoriesPage = () => {
-  // Dummy array to map cards
-  const items = Array(9).fill({ title: "Story Title", author: "Author Name" });
+  const [stories, setStories] = useState([]);
+  const [genre, setGenre] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+
+  // set story on load / everytime genre/sortBy changes
+  useEffect(() => {
+    getStories(genre, sortBy).then((data) => {
+      setStories(data);
+    });
+  }, [genre, sortBy]);
 
   return (
     <>
       <Header />
+      {/* placeholder page */}
       <Box sx={{ maxWidth: 1200, margin: "0 auto", p: 2 }}>
-        {/* Top bar with search and dropdowns */}
+        {/* search & filter */}
         <Box
           sx={{
             display: "flex",
@@ -29,7 +39,6 @@ const StoriesPage = () => {
             mb: 3,
           }}
         >
-          {/* Search field on left */}
           <TextField
             id="search-stories"
             label="Search"
@@ -51,35 +60,38 @@ const StoriesPage = () => {
               id="filter-stories"
               select
               label="Filter"
-              defaultValue="all"
+              value={genre}
+              onChange={(e) => {
+                setGenre(e.target.value);
+              }}
               size="small"
               sx={{ minWidth: 140 }}
             >
               <MenuItem value="all">All Genres</MenuItem>
-              <MenuItem value="fantasy">Fantasy</MenuItem>
-              <MenuItem value="sci-fi">Sci-Fi</MenuItem>
-              <MenuItem value="mystery">Mystery</MenuItem>
+              <MenuItem value="68e3cce7b2b124f59fa04578">Fantasy</MenuItem>
             </TextField>
 
             <TextField
               id="sort-stories"
               select
               label="Sort By"
-              defaultValue="newest"
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+              }}
               size="small"
               sx={{ minWidth: 140 }}
             >
               <MenuItem value="newest">Newest</MenuItem>
-              <MenuItem value="popular">Most Popular</MenuItem>
-              <MenuItem value="rating">Top Rated</MenuItem>
+              <MenuItem value="alphabetical">Alphabetical</MenuItem>
             </TextField>
           </Box>
         </Box>
 
         {/* 3-column grid for cards */}
         <Grid container spacing={3} sx={{ mx: "auto" }}>
-          {items.map((item, index) => (
-            <Grid key={index} item xs={12} sm={6} md={4}>
+          {stories.map((story) => (
+            <Grid key={story._id} item xs={12} sm={6} md={4}>
               <Card>
                 <CardMedia
                   component="img"
@@ -89,10 +101,10 @@ const StoriesPage = () => {
                 />
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    {item.title}
+                    {story.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {item.author}
+                    {story.author.name}
                   </Typography>
                 </CardContent>
                 <CardActions>
@@ -101,7 +113,7 @@ const StoriesPage = () => {
                     variant="contained"
                     fullWidth
                     component={Link}
-                    to="/stories/1"
+                    to={`/stories/${story._id}`}
                   >
                     View Story
                   </Button>

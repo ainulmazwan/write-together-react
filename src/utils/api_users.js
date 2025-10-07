@@ -17,3 +17,8 @@ export async function login(email, password) {
   });
   return response.data;
 }
+
+export async function getUserById(id) {
+  const response = await axios.get(API_URL + "users/" + id);
+  return response.data;
+}

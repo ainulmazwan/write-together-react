@@ -4,18 +4,40 @@ import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Header from "../components/Header";
+import { getStoryById } from "../utils/api_stories";
+import { useParams, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
 
 const StoryPage = () => {
+  const { id } = useParams();
+
+  const navigate = useNavigate();
+
+  const [story, setStory] = useState(null);
+
+  useEffect(() => {
+    getStoryById(id).then((data) => {
+      setStory(data);
+    });
+  }, [id, navigate]);
+
+  console.log(story);
+
+  // because get story by id is asynchronous
+  if (!story) {
+    return <>loading</>;
+  }
+
   return (
     <>
       <Header />
       {/* Header */}
       <Box sx={{ maxWidth: 800, margin: "0 auto", py: 4 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          Story Title
+          {story.title}
         </Typography>
         <Typography variant="subtitle1" align="center" color="text.secondary">
-          by Jojo | Genre: Fantasy
+          by {story.author.name} | Genre:{story.genre.name}
         </Typography>
       </Box>
 
@@ -25,13 +47,7 @@ const StoryPage = () => {
           <Typography variant="h5" sx={{ my: 2 }}>
             Description
           </Typography>
-          <Typography>
-            This is a captivating fantasy story that takes readers on an epic
-            journey through magical realms and heroic quests. Join the
-            protagonist as they navigate challenges, forge alliances, and
-            discover their true destiny in a world filled with wonder and
-            adventure.
-          </Typography>
+          <Typography>{story.description}</Typography>
         </Container>
         <Container>
           <Typography variant="h5" sx={{ my: 3 }}>
@@ -46,20 +62,25 @@ const StoryPage = () => {
               mt: 2,
             }}
           >
-            <Button variant="none">
-              <Typography>Chapter 1</Typography>
-            </Button>
-            <Button variant="none">
-              <Typography>Chapter 2</Typography>
-            </Button>
-            <Button variant="none">
-              <Typography>Chapter 3</Typography>
-            </Button>
+            {story.chapters.map((chapter, index) => (
+              <Button variant="none">
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    width: "100%",
+                  }}
+                >
+                  <Typography>Chapter {index + 1}</Typography>
+                  <Typography>by {chapter.author.name}</Typography>
+                </Box>
+              </Button>
+            ))}
           </Box>
         </Container>
         <Container>
           <Typography variant="h5" sx={{ my: 2 }}>
-            Current Round: Chapter 4
+            Current Round: Chapter {story.chapters.length + 1}
           </Typography>
 
           <Box
