@@ -3,10 +3,19 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
+import Button from "@mui/material/Button";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import { getChapter } from "../utils/api_chapters";
 import { getStoryById } from "../utils/api_stories";
+
+/* if chapter is not official 
+  AND if chapterNumber is equal to story.currentRound.chapterNumber
+  AND if story.currentRound.deadline is more than today's date
+    show vote button
+  else
+    don't show
+*/
 
 const ChapterPage = () => {
   const { id, chapterId } = useParams();
@@ -27,6 +36,8 @@ const ChapterPage = () => {
   if (!chapter || !story) {
     return <>chapter not found</>;
   }
+
+  const handleVote = () => {};
 
   return (
     <>
@@ -51,6 +62,13 @@ const ChapterPage = () => {
         <Paper sx={{ p: 3, mt: 4 }}>
           <Typography>{chapter.content}</Typography>
         </Paper>
+        {!chapter.isOfficial &&
+          chapter.chapterNumber === story.currentRound.chapterNumber &&
+          new Date(story.currentRound.deadline) > new Date() && (
+            <Button variant="contained" color="primary" onClick={handleVote}>
+              Vote for this Chapter
+            </Button>
+          )}
       </Container>
     </>
   );
