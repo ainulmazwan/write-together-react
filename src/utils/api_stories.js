@@ -11,7 +11,7 @@ export async function addStory(
   deadline,
   chapterContent
 ) {
-  const response = await axios.post(API_URL + "stories/add", {
+  const response = await axios.post(API_URL + "stories", {
     title,
     description,
     genre,

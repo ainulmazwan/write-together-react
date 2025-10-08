@@ -14,7 +14,7 @@ export default function Header() {
 
   const { currentuser } = cookies;
 
-  const handleOpenModal = async (id) => {
+  const handleOpenModal = async () => {
     Swal.fire({
       title: "Login Required",
       text: "You need to be logged in to create a story.",

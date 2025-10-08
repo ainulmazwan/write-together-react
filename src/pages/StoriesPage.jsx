@@ -25,6 +25,8 @@ const StoriesPage = () => {
     });
   }, [genre, sortBy]);
 
+  console.log(genre + " " + sortBy);
+
   return (
     <>
       <Header />

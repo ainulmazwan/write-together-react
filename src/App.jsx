@@ -1,7 +1,9 @@
 import StoriesPage from "./pages/StoriesPage";
 import StoryPage from "./pages/StoryPage";
+import ChapterPage from "./pages/ChapterPage";
 import SignupPage from "./pages/SignupPage";
 import StoryAdd from "./pages/StoryAdd";
+import SubmissionAdd from "./pages/SubmissionAdd";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
@@ -19,6 +21,11 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/stories" element={<StoriesPage />} />
             <Route path="/stories/:id" element={<StoryPage />} />
+            <Route path="/stories/:id/submit" element={<SubmissionAdd />} />
+            <Route
+              path="/stories/:id/chapters/:chapterId"
+              element={<ChapterPage />}
+            />
             <Route path="/stories/new" element={<StoryAdd />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
