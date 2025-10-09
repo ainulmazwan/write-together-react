@@ -92,37 +92,41 @@ const StoriesPage = () => {
 
         {/* 3-column grid for cards */}
         <Grid container spacing={3} sx={{ mx: "auto" }}>
-          {stories.map((story) => (
-            <Grid key={story._id} item xs={12} sm={6} md={4}>
-              <Card>
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Cat_August_2010-4.jpg/1200px-Cat_August_2010-4.jpg"
-                  alt="Story Image"
-                />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {story.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {story.author.name}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    fullWidth
-                    component={Link}
-                    to={`/stories/${story._id}`}
-                  >
-                    View Story
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
+          {stories.length === 0 ? (
+            <>no stories yet</>
+          ) : (
+            stories.map((story) => (
+              <Grid key={story._id} item xs={12} sm={6} md={4}>
+                <Card>
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Cat_August_2010-4.jpg/1200px-Cat_August_2010-4.jpg"
+                    alt="Story Image"
+                  />
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      {story.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {story.author.name}
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      fullWidth
+                      component={Link}
+                      to={`/stories/${story._id}`}
+                    >
+                      View Story
+                    </Button>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))
+          )}
         </Grid>
       </Box>
     </>

@@ -39,3 +39,9 @@ export async function getStories(genre, sortBy) {
   const response = await axios.get(API_URL + "stories");
   return response.data;
 }
+
+// advance round
+export async function advanceRound(storyId) {
+  const response = await axios.put(API_URL + "stories/advance/" + storyId);
+  return response.data;
+}
