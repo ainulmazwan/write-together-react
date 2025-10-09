@@ -37,21 +37,19 @@ export default function Header() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          ></IconButton>
-
-          <MenuBookIcon sx={{ marginRight: 3 }} />
           <Typography
             variant="h6"
             component={Link}
             to="/"
-            sx={{ flexGrow: 1, textDecoration: "none", color: "white" }}
+            sx={{
+              flexGrow: 1,
+              textDecoration: "none",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+            }}
           >
+            <MenuBookIcon sx={{ marginRight: 3, marginLeft: 4 }} />
             WriteTogether
           </Typography>
           <Button color="inherit" component={Link} to="/stories">

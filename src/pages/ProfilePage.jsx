@@ -2,7 +2,7 @@ import Header from "../components/Header";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
+import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
@@ -43,12 +43,38 @@ const ProfilePage = () => {
     });
   }, [currentuser]);
 
+  console.log(currentuser);
+
   return (
     <>
       <Header />
+      <Container maxWidth="lg" sx={{ mt: 6, mb: 4 }}>
+        <Box
+          sx={{
+            p: 4,
+            borderRadius: "12px",
+            bgcolor: "background.paper",
+            boxShadow: 2,
+          }}
+        >
+          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+            {currentuser?.name}
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+            {currentuser?.email}
+          </Typography>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="body2" color="text.secondary">
+            Member since{" "}
+            {currentuser?.createdAt
+              ? format(new Date(currentuser.createdAt), "MMMM yyyy")
+              : "Unknown"}
+          </Typography>
+        </Box>
+      </Container>
       <Container maxWidth="lg" sx={{ my: 5 }}>
         <Typography variant="h4" sx={{ py: 4 }}>
-          Your Stories
+          Your Stories ({storiesByUser.length})
         </Typography>
         {/* map all stories by user */}
         <Grid container spacing={3} sx={{ mx: "auto" }}>
@@ -59,14 +85,8 @@ const ProfilePage = () => {
               const isPublished = new Date(story.publishDate) <= new Date();
 
               return (
-                <Grid key={story._id} item xs={12} sm={6} md={4}>
+                <Grid key={story._id} item size={{ xs: 12, md: 6, lg: 4 }}>
                   <Card>
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Cat_August_2010-4.jpg/1200px-Cat_August_2010-4.jpg"
-                      alt="Story Image"
-                    />
                     <CardContent>
                       <Box
                         sx={{
@@ -121,7 +141,7 @@ const ProfilePage = () => {
       </Container>
       <Container maxWidth="lg" sx={{ my: 5 }}>
         <Typography variant="h4" sx={{ my: 4 }}>
-          Your Chapters
+          Your Chapters ({chaptersByUser.length})
         </Typography>
         <Box
           sx={{
@@ -148,8 +168,11 @@ const ProfilePage = () => {
               >
                 <Box>
                   <Typography>
-                    Chapter {chapter.chapterNumber} | {chapter.story.title} (by{" "}
-                    {chapter.author.name})
+                    Chapter {chapter.chapterNumber} |{" "}
+                    <Link to={`/stories/${chapter.story._id}`}>
+                      {chapter.story.title}
+                    </Link>{" "}
+                    (by {chapter.story.author.name})
                   </Typography>
                 </Box>
                 <Typography>
@@ -163,20 +186,13 @@ const ProfilePage = () => {
 
       <Container maxWidth="lg" sx={{ my: 5 }}>
         <Typography variant="h4" sx={{ py: 4 }}>
-          Your Favourites
+          Your Favourites ({favouritedStories.length})
         </Typography>
         <Grid container spacing={3} sx={{ mx: "auto" }}>
           {/* map all favourited stories */}
-          {/* placeholder for now */}
           {favouritedStories.map((story) => (
-            <Grid key={story._id} item xs={12} sm={6} md={4}>
+            <Grid key={story._id} item size={{ xs: 12, md: 6, lg: 4 }}>
               <Card>
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Cat_August_2010-4.jpg/1200px-Cat_August_2010-4.jpg"
-                  alt="Story Image"
-                />
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     {story.title}

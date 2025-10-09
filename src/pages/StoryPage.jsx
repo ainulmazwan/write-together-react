@@ -11,6 +11,7 @@ import {
   removeVote,
   getVote,
 } from "../utils/api_votes";
+import { getUserById } from "../utils/api_users";
 import { getSubmissionsForCurrentRound } from "../utils/api_chapters";
 import { addToFavourites, removeFromFavourites } from "../utils/api_users";
 import { useParams, useNavigate, Link } from "react-router";
@@ -26,7 +27,7 @@ const StoryPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [cookies] = useCookies(["currentuser"]);
+  const [cookies, setCookie] = useCookies(["currentuser"]);
   const { currentuser } = cookies;
 
   const [story, setStory] = useState(null);
@@ -76,11 +77,14 @@ const StoryPage = () => {
     if (!currentuser) {
       return;
     }
-    if (currentuser?.favourites.includes(id)) {
-      setIsFavourited(true);
-    }
-  }, [story]); // runs when story is loaded
-  console.log(isFavourited);
+
+    // for sm reason cookie does not update, have to call api to get updated user with favourites
+    getUserById(currentuser._id).then((data) => {
+      if (data.favourites.includes(id)) {
+        setIsFavourited(true);
+      }
+    });
+  }, [story, currentuser]); // runs when story is loaded
 
   // check if user already submitted
   useEffect(() => {
@@ -216,16 +220,32 @@ const StoryPage = () => {
 
   const handleAddToFavourites = async () => {
     await addToFavourites(currentuser._id, id);
+
+    // update local state
     setIsFavourited(true);
+
+    // update the cookie
+    const updatedUser = {
+      ...currentuser,
+      favourites: [...(currentuser.favourites || []), id],
+    };
+    setCookie("currentuser", updatedUser);
+
     toast.success(`${story.title} added to favourites`);
-    return;
   };
 
   const handleRemoveFromFavourites = async () => {
     await removeFromFavourites(currentuser._id, id);
+
     setIsFavourited(false);
+
+    const updatedUser = {
+      ...currentuser,
+      favourites: (currentuser.favourites || []).filter((fav) => fav !== id),
+    };
+    setCookie("currentuser", updatedUser);
+
     toast.success(`${story.title} removed from favourites`);
-    return;
   };
 
   const isHiatus = story.status === "hiatus";

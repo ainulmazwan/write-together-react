@@ -1,88 +1,144 @@
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
+import {
+  TextField,
+  MenuItem,
+  Box,
+  Grid,
+  Card,
+  CardActions,
+  CardContent,
+  CardMedia,
+  Button,
+  Typography,
+  Container,
+  IconButton,
+} from "@mui/material";
+import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import { Link } from "react-router";
 import Header from "../components/Header";
 import { getStories } from "../utils/api_stories";
+import { addToFavourites, removeFromFavourites } from "../utils/api_users";
 import { useState, useEffect } from "react";
+import { useCookies } from "react-cookie";
+import { toast } from "sonner";
+import Swal from "sweetalert2";
 
 const StoriesPage = () => {
   const [stories, setStories] = useState([]);
   const [genre, setGenre] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [favourites, setFavourites] = useState([]);
+  const [cookies, setCookie] = useCookies(["currentuser"]);
+  const { currentuser } = cookies || {};
 
-  // set story on load / everytime genre/sortBy changes
+  // Fetch stories
   useEffect(() => {
-    getStories(genre, sortBy).then((data) => {
+    const fetchStories = async () => {
+      const data = await getStories(genre, status, search, sortBy);
       setStories(data);
-    });
-  }, [genre, sortBy]);
+    };
+    fetchStories();
+  }, [genre, status, search, sortBy]);
 
-  console.log(genre + " " + sortBy);
+  // Set favourites from cookie
+  useEffect(() => {
+    if (currentuser?.favourites) {
+      setFavourites(currentuser.favourites.map((id) => id.toString()));
+    } else {
+      setFavourites([]);
+    }
+  }, [currentuser]);
+
+  const handleOpenModal = async () => {
+    Swal.fire({
+      title: "Login Required",
+      text: "You need to be logged in to favourite stories.",
+      icon: "warning",
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: "Login",
+      denyButtonText: "Sign Up",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) window.location.href = "/login";
+      else if (result.isDenied) window.location.href = "/signup";
+    });
+  };
+
+  const handleFavourite = async (storyId, isFavourited) => {
+    try {
+      let updatedUser;
+      if (isFavourited) {
+        updatedUser = await removeFromFavourites(currentuser._id, storyId);
+        setFavourites((prev) => prev.filter((id) => id !== storyId));
+        toast.success("Removed from favourites");
+      } else {
+        updatedUser = await addToFavourites(currentuser._id, storyId);
+        setFavourites((prev) => [...prev, storyId]);
+        toast.success("Added to favourites");
+      }
+      setCookie("currentuser", updatedUser, { path: "/" });
+    } catch (error) {
+      toast.error("Error updating favourites");
+    }
+  };
 
   return (
     <>
       <Header />
-      {/* placeholder page */}
-      <Box sx={{ maxWidth: 1200, margin: "0 auto", p: 2 }}>
-        {/* search & filter */}
+      <Box sx={{ maxWidth: 1400, mx: "auto", px: 3, py: 4 }}>
+        {/* Filters */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            mb: 3,
+            gap: 2,
+            mb: 4,
           }}
         >
           <TextField
-            id="search-stories"
             label="Search"
             variant="outlined"
             size="small"
-            sx={{ flexBasis: "40%" }}
-          />
-
-          {/* Filter and Sort selects on right */}
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              flexBasis: "55%",
-              justifyContent: "flex-end",
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
             }}
-          >
+            xs={{ minWidth: "500px" }}
+          />
+          <Box>
             <TextField
-              id="filter-stories"
               select
-              label="Filter"
-              value={genre}
-              onChange={(e) => {
-                setGenre(e.target.value);
-              }}
+              label="Status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
               size="small"
-              sx={{ minWidth: 140 }}
+              sx={{ minWidth: 150 }}
+            >
+              <MenuItem value="all">All Status</MenuItem>
+              <MenuItem value="ongoing">Ongoing</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="hiatus">Hiatus</MenuItem>
+            </TextField>
+            <TextField
+              select
+              label="Status"
+              value={genre}
+              onChange={(e) => setGenre(e.target.value)}
+              size="small"
+              sx={{ minWidth: 150, marginLeft: 2 }}
             >
               <MenuItem value="all">All Genres</MenuItem>
-              <MenuItem value="68e3cce7b2b124f59fa04578">Fantasy</MenuItem>
+              <MenuItem value="ongoing">Fantasy</MenuItem>
             </TextField>
-
             <TextField
-              id="sort-stories"
               select
               label="Sort By"
               value={sortBy}
-              onChange={(e) => {
-                setSortBy(e.target.value);
-              }}
+              onChange={(e) => setSortBy(e.target.value)}
               size="small"
-              sx={{ minWidth: 140 }}
+              sx={{ minWidth: 150, marginLeft: 2 }}
             >
               <MenuItem value="newest">Newest</MenuItem>
               <MenuItem value="alphabetical">Alphabetical</MenuItem>
@@ -90,42 +146,83 @@ const StoriesPage = () => {
           </Box>
         </Box>
 
-        {/* 3-column grid for cards */}
-        <Grid container spacing={3} sx={{ mx: "auto" }}>
+        {/* stories */}
+
+        <Grid container spacing={3}>
           {stories.length === 0 ? (
-            <>no stories yet</>
+            <Typography sx={{ mx: "auto", mt: 4 }}>No stories yet</Typography>
           ) : (
-            stories.map((story) => (
-              <Grid key={story._id} item xs={12} sm={6} md={4}>
-                <Card>
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Cat_August_2010-4.jpg/1200px-Cat_August_2010-4.jpg"
-                    alt="Story Image"
-                  />
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      {story.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {story.author.name}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      fullWidth
-                      component={Link}
-                      to={`/stories/${story._id}`}
+            stories.map((story) => {
+              const isFavourited = favourites.includes(story._id.toString());
+              return (
+                <Grid key={story._id} item size={{ xs: 12, md: 6, lg: 4 }}>
+                  <Card
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      position: "relative",
+                      boxShadow: 3,
+                      transition: "transform 0.2s",
+                      "&:hover": { transform: "scale(1.02)" },
+                    }}
+                  >
+                    <IconButton
+                      onClick={() => {
+                        if (!currentuser) handleOpenModal();
+                        else handleFavourite(story._id, isFavourited);
+                      }}
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        backgroundColor: "rgba(255,255,255,0.8)",
+                        "&:hover": { backgroundColor: "rgba(255,255,255,1)" },
+                      }}
                     >
-                      View Story
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            ))
+                      {isFavourited ? (
+                        <Favorite color="error" />
+                      ) : (
+                        <FavoriteBorder />
+                      )}
+                    </IconButton>
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+                        {story.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        by {story.author.name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          mt: 1,
+                          fontWeight: "bold",
+                          color:
+                            story.status === "ongoing"
+                              ? "green"
+                              : story.status === "hiatus"
+                              ? "orange"
+                              : "blue",
+                        }}
+                      >
+                        {story.status.toUpperCase()}
+                      </Typography>
+                    </CardContent>
+                    <CardActions>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        fullWidth
+                        component={Link}
+                        to={`/stories/${story._id}`}
+                      >
+                        View Story
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              );
+            })
           )}
         </Grid>
       </Box>

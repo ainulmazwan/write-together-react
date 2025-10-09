@@ -7,6 +7,7 @@ import SubmissionAdd from "./pages/SubmissionAdd";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
+import GenresPage from "./pages/GenresPage";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { Toaster } from "sonner";
 import { CookiesProvider } from "react-cookie";
@@ -29,6 +30,7 @@ function App() {
             <Route path="/stories/new" element={<StoryAdd />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/genres" element={<GenresPage />} />
           </Routes>
           <Toaster />
         </BrowserRouter>

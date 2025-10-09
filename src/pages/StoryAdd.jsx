@@ -19,7 +19,6 @@ import { toast } from "sonner";
 
 const StoryAdd = () => {
   const navigate = useNavigate();
-
   const [cookies] = useCookies("currentuser");
   const { currentuser } = cookies;
 
@@ -31,9 +30,7 @@ const StoryAdd = () => {
   const [chapterContent, setChapterContent] = useState("");
 
   useEffect(() => {
-    if (!currentuser) {
-      navigate("/");
-    }
+    if (!currentuser) navigate("/");
   }, [currentuser]);
 
   const handleSubmit = async () => {
@@ -45,73 +42,76 @@ const StoryAdd = () => {
       !description ||
       !chapterContent
     ) {
-      toast.error("Fill in all the fields");
-    } else {
-      try {
-        const author = currentuser._id;
-        const deadline = publishDate
-          .add(Number(votingWindow), "day")
-          .toISOString();
-        const story = await addStory(
-          title,
-          description,
-          genre,
-          author,
-          publishDate.toISOString(),
-          votingWindow,
-          deadline,
-          chapterContent
-        );
-        // toast and navigate
-        toast.success("Story " + story.title + " created!");
-        navigate("/");
-      } catch (error) {
-        console.log(error);
-        toast.error(error.response.data.message);
-      }
+      toast.error("Please fill in all the fields.");
+      return;
+    }
+
+    try {
+      const author = currentuser._id;
+      const deadline = publishDate
+        .add(Number(votingWindow), "day")
+        .toISOString();
+
+      const story = await addStory(
+        title,
+        description,
+        genre,
+        author,
+        publishDate.toISOString(),
+        votingWindow,
+        deadline,
+        chapterContent
+      );
+
+      toast.success(`Story "${story.title}" created!`);
+      navigate("/profile");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Error creating story");
     }
   };
 
   return (
     <>
       <Header />
-      <Container maxWidth="sm">
-        <Typography variant="h3" align="center" mb={2} sx={{ my: 5 }}>
-          Create New Story
-        </Typography>
-        <Box mb={2}>
-          <TextField
-            label="Title"
-            fullWidth
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-            }}
-          />
-        </Box>
-        <Box mb={2}>
-          <FormControl sx={{ width: "100%" }}>
-            <InputLabel
-              id="demo-simple-select-label"
-              sx={{ backgroundColor: "white", paddingRight: "5px" }}
-            >
-              Genre
-            </InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={genre}
-              onChange={(e) => {
-                setGenre(e.target.value);
-              }}
-            >
-              <MenuItem value="68e3cce7b2b124f59fa04578">Fantasy</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-        <Box mb={2}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Box components={["DateTimePicker"]}>
+      <Container maxWidth="md" sx={{ py: 6 }}>
+        <Box
+          sx={{
+            backgroundColor: "white",
+            borderRadius: 3,
+            boxShadow: 3,
+            p: 5,
+          }}
+        >
+          <Typography
+            variant="h4"
+            align="center"
+            fontWeight={700}
+            sx={{ mb: 2 }}
+          >
+            Create a New Story
+          </Typography>
+
+          <Box display="flex" flexDirection="column" gap={3}>
+            <TextField
+              label="Title"
+              fullWidth
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <FormControl fullWidth>
+              <InputLabel>Genre</InputLabel>
+              <Select
+                value={genre}
+                label="Genre"
+                onChange={(e) => setGenre(e.target.value)}
+              >
+                <MenuItem value="68e3cce7b2b124f59fa04578">Fantasy</MenuItem>
+              </Select>
+            </FormControl>
+
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateTimePicker
                 disablePast
                 label="Publish Date/Time"
@@ -119,53 +119,45 @@ const StoryAdd = () => {
                 value={publishDate}
                 onChange={(newValue) => setPublishDate(newValue)}
               />
-            </Box>
-          </LocalizationProvider>
-        </Box>
-        <Box mb={2}>
-          <TextField
-            label="Voting Window (days)"
-            type="number"
-            fullWidth
-            value={votingWindow}
-            onChange={(e) => {
-              setVotingWindow(e.target.value);
-            }}
-          />
-        </Box>
-        <Box mb={2}>
-          <TextField
-            label="Description"
-            fullWidth
-            multiline
-            rows={3}
-            value={description}
-            onChange={(e) => {
-              setDescription(e.target.value);
-            }}
-          />
-        </Box>
-        <Box mb={2}>
-          <TextField
-            label="Chapter 1"
-            fullWidth
-            multiline
-            rows={10}
-            value={chapterContent}
-            onChange={(e) => {
-              setChapterContent(e.target.value);
-            }}
-          />
-        </Box>
-        <Box mb={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={handleSubmit}
-          >
-            Submit
-          </Button>
+            </LocalizationProvider>
+
+            <TextField
+              label="Voting Window (days)"
+              type="number"
+              fullWidth
+              value={votingWindow}
+              onChange={(e) => setVotingWindow(e.target.value)}
+            />
+
+            <TextField
+              label="Description"
+              fullWidth
+              multiline
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+
+            <TextField
+              label="Chapter 1 Content"
+              fullWidth
+              multiline
+              rows={10}
+              value={chapterContent}
+              onChange={(e) => setChapterContent(e.target.value)}
+            />
+
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              fullWidth
+              sx={{ mt: 2, py: 1.4, fontWeight: 600 }}
+              onClick={handleSubmit}
+            >
+              Create Story
+            </Button>
+          </Box>
         </Box>
       </Container>
     </>

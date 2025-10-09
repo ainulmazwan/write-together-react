@@ -35,8 +35,31 @@ export async function getStoriesByAuthor(id) {
 }
 
 // get ALL stories
-export async function getStories(genre, sortBy) {
-  const response = await axios.get(API_URL + "stories");
+export async function getStories(genre, status, search, sortBy) {
+  let queryParams = {};
+
+  // check if queries exist
+  if (genre !== "all") {
+    queryParams.genre = genre;
+  }
+  if (status !== "all") {
+    queryParams.status = status;
+  }
+  if (search !== "") {
+    queryParams.search = search;
+  }
+
+  const queryString = new URLSearchParams(queryParams).toString();
+
+  let full_API_URL = API_URL + "stories";
+
+  console.log(full_API_URL);
+
+  if (queryString) {
+    full_API_URL += "?" + queryString;
+  }
+
+  const response = await axios.get(full_API_URL);
   return response.data;
 }
 
