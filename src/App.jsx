@@ -8,6 +8,8 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import GenresPage from "./pages/GenresPage";
+import UsersPage from "./pages/UsersPage";
+import UserUpdate from "./pages/UserUpdate";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { Toaster } from "sonner";
 import { CookiesProvider } from "react-cookie";
@@ -31,6 +33,8 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/genres" element={<GenresPage />} />
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/users/:userId" element={<UserUpdate />} />
           </Routes>
           <Toaster />
         </BrowserRouter>

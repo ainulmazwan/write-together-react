@@ -42,3 +42,34 @@ export async function getFavouritedStories(userId) {
   const response = await axios.get(API_URL + "users/" + userId + "/favourites");
   return response.data;
 }
+
+// ADMIN ONLY
+// get ALL users (admin only)
+export async function getUsers(token) {
+  const response = await axios.get(API_URL + "users", {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
+  return response.data;
+}
+
+// update user
+export async function updateUser(id, updates, token) {
+  const response = await axios.put(API_URL + "users/" + id, updates, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
+  return response.data;
+}
+
+// delete user
+export async function deleteUser(id, token) {
+  const response = await axios.delete(API_URL + "users/" + id, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
+  return response.data;
+}

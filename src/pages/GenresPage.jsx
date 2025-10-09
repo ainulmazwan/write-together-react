@@ -15,6 +15,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import Swal from "sweetalert2";
 import { useState, useEffect } from "react";
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router";
 import {
   getGenres,
   addGenre,
@@ -25,12 +27,19 @@ import { toast } from "sonner";
 
 const GenresPage = () => {
   const [genres, setGenres] = useState([]);
+  const [cookies] = useCookies(["currentuser"]);
+  const { currentuser } = cookies;
+
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (!currentuser || currentuser.role !== "admin") {
+      navigate("/");
+    }
     getGenres().then((data) => {
       setGenres(data);
     });
-  }, []);
+  }, [currentuser]);
 
   const handleAddModal = () => {
     Swal.fire({

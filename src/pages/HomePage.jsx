@@ -115,6 +115,8 @@ const HomePage = () => {
               <Grid key={1} item size={{ xs: 12, md: 6, lg: 4 }}>
                 <Button
                   fullWidth
+                  component={Link}
+                  to="/users"
                   sx={{
                     textTransform: "none",
                     p: 0,
@@ -192,6 +194,8 @@ const HomePage = () => {
               <Grid key={3} item size={{ xs: 12, md: 6, lg: 4 }}>
                 <Button
                   fullWidth
+                  component={Link}
+                  to="/genres"
                   sx={{
                     textTransform: "none",
                     p: 0,
@@ -214,21 +218,16 @@ const HomePage = () => {
                       },
                     }}
                   >
-                    <Button
-                      component={Link}
-                      to="/genres"
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        textAlign: "center",
+                        fontWeight: 600,
+                        color: "text.primary",
+                      }}
                     >
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          textAlign: "center",
-                          fontWeight: 600,
-                          color: "text.primary",
-                        }}
-                      >
-                        Manage Genres
-                      </Typography>
-                    </Button>
+                      Manage Genres
+                    </Typography>
                   </Card>
                 </Button>
               </Grid>
