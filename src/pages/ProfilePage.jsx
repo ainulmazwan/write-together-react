@@ -11,6 +11,7 @@ import Grid from "@mui/material/Grid";
 import { Link, useNavigate } from "react-router";
 import { useCookies } from "react-cookie";
 import { getStoriesByAuthor } from "../utils/api_stories";
+import { getFavouritedStories } from "../utils/api_users";
 import { getChaptersByAuthor } from "../utils/api_chapters";
 import { useEffect, useState } from "react";
 
@@ -20,6 +21,7 @@ const ProfilePage = () => {
   const [cookies] = useCookies(["currentuser"]);
   const [storiesByUser, setStoriesByUser] = useState([]);
   const [chaptersByUser, setChaptersByUser] = useState([]);
+  const [favouritedStories, setFavouritedStories] = useState([]);
   const { currentuser } = cookies;
 
   useEffect(() => {
@@ -35,9 +37,11 @@ const ProfilePage = () => {
     getChaptersByAuthor(currentuser._id).then((data) => {
       setChaptersByUser(data);
     });
-  }, [currentuser]);
 
-  console.log(chaptersByUser);
+    getFavouritedStories(currentuser._id).then((data) => {
+      setFavouritedStories(data);
+    });
+  }, [currentuser]);
 
   return (
     <>
@@ -164,7 +168,7 @@ const ProfilePage = () => {
         <Grid container spacing={3} sx={{ mx: "auto" }}>
           {/* map all favourited stories */}
           {/* placeholder for now */}
-          {storiesByUser.map((story) => (
+          {favouritedStories.map((story) => (
             <Grid key={story._id} item xs={12} sm={6} md={4}>
               <Card>
                 <CardMedia
@@ -187,7 +191,7 @@ const ProfilePage = () => {
                     variant="contained"
                     fullWidth
                     component={Link}
-                    to="/stories/1"
+                    to={`/stories/${story._id}`}
                   >
                     View Story
                   </Button>

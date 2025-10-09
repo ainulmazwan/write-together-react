@@ -12,12 +12,15 @@ import {
   getVote,
 } from "../utils/api_votes";
 import { getSubmissionsForCurrentRound } from "../utils/api_chapters";
+import { addToFavourites, removeFromFavourites } from "../utils/api_users";
 import { useParams, useNavigate, Link } from "react-router";
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useCookies } from "react-cookie";
 import Swal from "sweetalert2";
 import { toast } from "sonner";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 const StoryPage = () => {
   const { id } = useParams();
@@ -31,6 +34,7 @@ const StoryPage = () => {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [voteCounts, setVoteCounts] = useState({});
   const [userVote, setUserVote] = useState(null);
+  const [isFavourited, setIsFavourited] = useState(false);
 
   // get story data and submissions for current round
   useEffect(() => {
@@ -68,7 +72,15 @@ const StoryPage = () => {
 
       handleAdvance();
     }
+
+    if (!currentuser) {
+      return;
+    }
+    if (currentuser?.favourites.includes(id)) {
+      setIsFavourited(true);
+    }
   }, [story]); // runs when story is loaded
+  console.log(isFavourited);
 
   // check if user already submitted
   useEffect(() => {
@@ -163,7 +175,7 @@ const StoryPage = () => {
           2nd submission shares rank with 1st submission
     */
     if (votes !== lastVoteCount) {
-      // if previous ranks "share" a rank, make sure that next rank is still logic 
+      // if previous ranks "share" a rank, make sure that next rank is still logic
       // (ie. 1, 1, 3 -> first 2 share rank 1, third item is still 3rd place)
       lastRank = index + 1; // only add to index if this sub doesnt share rank with previous sub
       lastVoteCount = votes;
@@ -202,6 +214,20 @@ const StoryPage = () => {
     return;
   };
 
+  const handleAddToFavourites = async () => {
+    await addToFavourites(currentuser._id, id);
+    setIsFavourited(true);
+    toast.success(`${story.title} added to favourites`);
+    return;
+  };
+
+  const handleRemoveFromFavourites = async () => {
+    await removeFromFavourites(currentuser._id, id);
+    setIsFavourited(false);
+    toast.success(`${story.title} removed from favourites`);
+    return;
+  };
+
   const isHiatus = story.status === "hiatus";
   const isAuthor = currentuser && currentuser._id === story.author._id;
 
@@ -216,6 +242,21 @@ const StoryPage = () => {
         <Typography variant="subtitle1" align="center" color="text.secondary">
           by {story.author.name} | Genre:{story.genre.name}
         </Typography>
+        <Box sx={{ display: "flex", justifyContent: "end" }}>
+          {isFavourited ? (
+            <Button onClick={handleRemoveFromFavourites}>
+              <FavoriteIcon />
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                currentuser ? handleAddToFavourites() : handleOpenModal();
+              }}
+            >
+              <FavoriteBorderIcon />
+            </Button>
+          )}
+        </Box>
       </Box>
 
       {/* Main two-column layout */}
