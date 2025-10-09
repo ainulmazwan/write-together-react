@@ -11,6 +11,7 @@ import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
+import { getGenres } from "../utils/api_genres";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
@@ -22,6 +23,8 @@ const StoryAdd = () => {
   const [cookies] = useCookies("currentuser");
   const { currentuser } = cookies;
 
+  const [genres, setGenres] = useState([]);
+
   const [title, setTitle] = useState("");
   const [genre, setGenre] = useState("");
   const [publishDate, setPublishDate] = useState(null);
@@ -30,7 +33,14 @@ const StoryAdd = () => {
   const [chapterContent, setChapterContent] = useState("");
 
   useEffect(() => {
-    if (!currentuser) navigate("/");
+    if (!currentuser) {
+      navigate("/");
+      return;
+    }
+
+    getGenres().then((data) => {
+      setGenres(data);
+    });
   }, [currentuser]);
 
   const handleSubmit = async () => {
@@ -107,7 +117,13 @@ const StoryAdd = () => {
                 label="Genre"
                 onChange={(e) => setGenre(e.target.value)}
               >
-                <MenuItem value="68e3cce7b2b124f59fa04578">Fantasy</MenuItem>
+                {genres.length !== 0 ? (
+                  genres.map((genre) => (
+                    <MenuItem value={genre._id}>{genre.name}</MenuItem>
+                  ))
+                ) : (
+                  <>no genres</>
+                )}
               </Select>
             </FormControl>
 

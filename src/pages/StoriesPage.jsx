@@ -16,6 +16,7 @@ import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import { Link } from "react-router";
 import Header from "../components/Header";
 import { getStories } from "../utils/api_stories";
+import { getGenres } from "../utils/api_genres";
 import { addToFavourites, removeFromFavourites } from "../utils/api_users";
 import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
@@ -24,6 +25,7 @@ import Swal from "sweetalert2";
 
 const StoriesPage = () => {
   const [stories, setStories] = useState([]);
+  const [genres, setGenres] = useState([]);
   const [genre, setGenre] = useState("all");
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
@@ -32,7 +34,16 @@ const StoriesPage = () => {
   const [cookies, setCookie] = useCookies(["currentuser"]);
   const { currentuser } = cookies || {};
 
-  // Fetch stories
+  // get genres
+  useEffect(() => {
+    getGenres().then((data) => {
+      setGenres(data);
+    });
+  }, []);
+
+  console.log(genres);
+
+  // fetch stories
   useEffect(() => {
     const fetchStories = async () => {
       const data = await getStories(genre, status, search, sortBy);
@@ -41,7 +52,7 @@ const StoriesPage = () => {
     fetchStories();
   }, [genre, status, search, sortBy]);
 
-  // Set favourites from cookie
+  // set favourites from cookie
   useEffect(() => {
     if (currentuser?.favourites) {
       setFavourites(currentuser.favourites.map((id) => id.toString()));
@@ -130,7 +141,13 @@ const StoriesPage = () => {
               sx={{ minWidth: 150, marginLeft: 2 }}
             >
               <MenuItem value="all">All Genres</MenuItem>
-              <MenuItem value="ongoing">Fantasy</MenuItem>
+              {genres.length !== 0 ? (
+                genres.map((genre) => (
+                  <MenuItem value={genre._id}>{genre.name}</MenuItem>
+                ))
+              ) : (
+                <>loading</>
+              )}
             </TextField>
             <TextField
               select

@@ -53,8 +53,6 @@ export async function getStories(genre, status, search, sortBy) {
 
   let full_API_URL = API_URL + "stories";
 
-  console.log(full_API_URL);
-
   if (queryString) {
     full_API_URL += "?" + queryString;
   }
