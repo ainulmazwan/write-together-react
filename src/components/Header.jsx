@@ -10,8 +10,7 @@ import { useCookies } from "react-cookie";
 import Swal from "sweetalert2";
 
 export default function Header() {
-  const [cookies, setCookie, removeCookie] = useCookies("currentuser");
-
+  const [cookies, , removeCookie] = useCookies(["currentuser"]);
   const { currentuser } = cookies;
 
   const handleOpenModal = async () => {
@@ -52,11 +51,20 @@ export default function Header() {
             <MenuBookIcon sx={{ marginRight: 3, marginLeft: 4 }} />
             WriteTogether
           </Typography>
+
+          {/* users link only for admins */}
+          {currentuser?.role === "admin" && (
+            <Button color="inherit" component={Link} to="/users">
+              Users
+            </Button>
+          )}
+
           <Button color="inherit" component={Link} to="/stories">
             Stories
           </Button>
 
-          {currentuser ? (
+          {/* normal user logged in */}
+          {currentuser?.role === "user" ? (
             <>
               <Button color="inherit" component={Link} to="/stories/new">
                 Create
@@ -74,7 +82,28 @@ export default function Header() {
                 Logout
               </Button>
             </>
-          ) : (
+          ) : null}
+
+          {/* admin logged in */}
+          {currentuser?.role === "admin" ? (
+            <>
+              <Button color="inherit" component={Link} to="/genres">
+                Genres
+              </Button>
+              <Button
+                color="inherit"
+                onClick={() => {
+                  removeCookie("currentuser");
+                  window.location.href = "/";
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : null}
+
+          {/* not logged in */}
+          {!currentuser ? (
             <>
               <Button color="inherit" onClick={handleOpenModal}>
                 Create
@@ -86,7 +115,7 @@ export default function Header() {
                 Signup
               </Button>
             </>
-          )}
+          ) : null}
         </Toolbar>
       </AppBar>
     </Box>

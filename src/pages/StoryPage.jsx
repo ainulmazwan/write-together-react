@@ -22,6 +22,8 @@ import Swal from "sweetalert2";
 import { toast } from "sonner";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import ModeIcon from "@mui/icons-material/Mode";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const StoryPage = () => {
   const { id } = useParams();
@@ -39,98 +41,66 @@ const StoryPage = () => {
 
   // get story data and submissions for current round
   useEffect(() => {
-    getStoryById(id).then((data) => {
-      setStory(data);
-    });
-
-    getSubmissionsForCurrentRound(id).then((data) => {
-      setSubmissions(data);
-    });
+    getStoryById(id).then((data) => setStory(data));
+    getSubmissionsForCurrentRound(id).then((data) => setSubmissions(data));
   }, [id, navigate]);
 
   useEffect(() => {
-    // check if story is not loaded
     if (!story?.currentRound?.deadline) return;
 
     const now = new Date();
     const deadline = new Date(story.currentRound.deadline);
 
-    // if deadline is past, advance round
     if (now > deadline) {
       const handleAdvance = async () => {
         try {
           await advanceRound(id);
-          // fetch updated data
           const updatedStory = await getStoryById(story._id);
           const updatedSubs = await getSubmissionsForCurrentRound(story._id);
-          // set updated data to states
           setStory(updatedStory);
           setSubmissions(updatedSubs);
         } catch (error) {
           console.error(error);
         }
       };
-
       handleAdvance();
     }
 
-    if (!currentuser) {
-      return;
-    }
+    if (!currentuser) return;
 
-    // for sm reason cookie does not update, have to call api to get updated user with favourites
     getUserById(currentuser._id).then((data) => {
-      if (data.favourites.includes(id)) {
-        setIsFavourited(true);
-      }
+      if (data.favourites.includes(id)) setIsFavourited(true);
     });
-  }, [story, currentuser]); // runs when story is loaded
+  }, [story, currentuser]);
 
-  // check if user already submitted
   useEffect(() => {
-    if (!currentuser) {
-      return;
-    }
+    if (!currentuser) return;
     const userId = currentuser._id;
-    // check if user has already submitted a chapter
     const alreadySubmitted = submissions.some(
       (submission) => submission.author._id === userId
     );
     setHasSubmitted(alreadySubmitted);
   }, [currentuser, submissions]);
 
-  // create voteCounts objects to connect vote counts to submissions
   useEffect(() => {
     const fetchVotes = async () => {
       try {
         const counts = {};
-
         for (const submission of submissions) {
-          console.log(submission._id);
           const votes = await getVotesForSubmission(submission._id);
           counts[submission._id] = votes.length;
         }
-
         setVoteCounts(counts);
       } catch (error) {
         console.error("Error fetching votes:", error);
       }
     };
-
-    if (submissions.length > 0) {
-      fetchVotes();
-    }
+    if (submissions.length > 0) fetchVotes();
   }, [submissions]);
 
-  // get user vote if there
   useEffect(() => {
-    if (!currentuser) {
-      return;
-    }
-
-    getVote(currentuser._id, id).then((data) => {
-      setUserVote(data);
-    });
+    if (!currentuser) return;
+    getVote(currentuser._id, id).then((data) => setUserVote(data));
   }, [currentuser, story]);
 
   const handleOpenModal = async () => {
@@ -144,44 +114,24 @@ const StoryPage = () => {
       denyButtonText: "Sign Up",
       cancelButtonText: "Cancel",
     }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = "/login";
-      } else if (result.isDenied) {
-        window.location.href = "/signup";
-      }
+      if (result.isConfirmed) window.location.href = "/login";
+      else if (result.isDenied) window.location.href = "/signup";
     });
   };
 
-  // because get story by id is asynchronous
-  if (!story || !voteCounts) {
-    return <>loading</>;
-  }
+  if (!story || !voteCounts) return <>loading</>;
 
-  // sort submissions for ranking
-  const sortedSubmissions = [...submissions].sort((a, b) => {
-    const votesA = voteCounts[a._id];
-    const votesB = voteCounts[b._id];
+  const sortedSubmissions = [...submissions].sort(
+    (a, b) => (voteCounts[b._id] || 0) - (voteCounts[a._id] || 0)
+  );
 
-    // descending order (high to low)
-    return votesB - votesA;
-  });
-
-  // assign ranks
-  let lastVoteCount = null; // last submission's vote count
-  let lastRank = 0; // last submission's rank
+  let lastVoteCount = null;
+  let lastRank = 0;
 
   const rankedSubmissions = sortedSubmissions.map((sub, index) => {
     const votes = voteCounts[sub._id] || 0;
-    /* since sortedSubmissions is already sorted from high to low votes,
-        if the 2nd submission's votes different than the 1st submission's votes,
-          it means 2nd has lower rank (ranknumber + 1)
-        else 
-          2nd submission shares rank with 1st submission
-    */
     if (votes !== lastVoteCount) {
-      // if previous ranks "share" a rank, make sure that next rank is still logic
-      // (ie. 1, 1, 3 -> first 2 share rank 1, third item is still 3rd place)
-      lastRank = index + 1; // only add to index if this sub doesnt share rank with previous sub
+      lastRank = index + 1;
       lastVoteCount = votes;
     }
     return { ...sub, rank: lastRank, votes };
@@ -190,61 +140,42 @@ const StoryPage = () => {
   const handleAddVote = async (chapterId) => {
     const userId = currentuser._id;
     const storyId = id;
-    await addVote(userId, chapterId, storyId).then((data) => {
-      // set userVote state
-      setUserVote(data);
-    });
-    // update voteCounts state
+    await addVote(userId, chapterId, storyId).then((data) => setUserVote(data));
     setVoteCounts((prev) => ({
       ...prev,
-      [chapterId]: (prev[chapterId] || 0) + 1, // = previous votes for chapter + 1
+      [chapterId]: (prev[chapterId] || 0) + 1,
     }));
-
     toast.success("Vote added!");
-    return;
   };
 
   const handleRemoveVote = async (chapterId) => {
     const userId = currentuser._id;
     await removeVote(userId, chapterId);
-    // remove userVote from state
     setUserVote(null);
-    // update voteCounts state
     setVoteCounts((prev) => ({
       ...prev,
-      [chapterId]: (prev[chapterId] || 0) - 1, // = previous votes for chapter - 1
+      [chapterId]: (prev[chapterId] || 0) - 1,
     }));
     toast.success("Vote removed!");
-    return;
   };
 
   const handleAddToFavourites = async () => {
     await addToFavourites(currentuser._id, id);
-
-    // update local state
     setIsFavourited(true);
-
-    // update the cookie
-    const updatedUser = {
+    setCookie("currentuser", {
       ...currentuser,
       favourites: [...(currentuser.favourites || []), id],
-    };
-    setCookie("currentuser", updatedUser);
-
+    });
     toast.success(`${story.title} added to favourites`);
   };
 
   const handleRemoveFromFavourites = async () => {
     await removeFromFavourites(currentuser._id, id);
-
     setIsFavourited(false);
-
-    const updatedUser = {
+    setCookie("currentuser", {
       ...currentuser,
       favourites: (currentuser.favourites || []).filter((fav) => fav !== id),
-    };
-    setCookie("currentuser", updatedUser);
-
+    });
     toast.success(`${story.title} removed from favourites`);
   };
 
@@ -254,208 +185,247 @@ const StoryPage = () => {
   return (
     <>
       <Header />
-      {/* Header */}
-      <Box sx={{ maxWidth: 800, margin: "0 auto", py: 4 }}>
-        <Typography variant="h3" align="center" gutterBottom>
+      {/* header */}
+      <Box sx={{ maxWidth: 800, mx: "auto", py: 6, textAlign: "center" }}>
+        <Typography variant="h3" gutterBottom>
           {story.title}
         </Typography>
-        <Typography variant="subtitle1" align="center" color="text.secondary">
-          by {story.author.name} | Genre:{story.genre.name}
+        <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+          Original Author:{" "}
+          <Typography
+            component="span"
+            variant="h6"
+            sx={{ fontWeight: 600, color: "text.primary" }}
+          >
+            {story.author.name}
+          </Typography>{" "}
+          , Genre:{" "}
+          <Typography
+            component="span"
+            variant="h6"
+            sx={{ fontStyle: "italic", color: "text.primary" }}
+          >
+            {story.genre.name}
+          </Typography>
         </Typography>
-        <Box sx={{ display: "flex", justifyContent: "end" }}>
-          {isFavourited ? (
-            <Button onClick={handleRemoveFromFavourites}>
-              <FavoriteIcon />
-            </Button>
-          ) : (
+        {currentuser?.role === "admin" ||
+        currentuser?._id === story.author._id ? (
+          <Box sx={{ marginTop: 2 }}>
             <Button
-              onClick={() => {
-                currentuser ? handleAddToFavourites() : handleOpenModal();
-              }}
+              variant="outlined"
+              color="primary"
+              sx={{ marginRight: 2 }}
+              component={Link}
+              to={`/stories/update/${story._id}`}
             >
-              <FavoriteBorderIcon />
+              Edit <ModeIcon sx={{ marginLeft: 1 }} />
             </Button>
-          )}
-        </Box>
+            <Button variant="contained" color="error">
+              Delete <DeleteIcon sx={{ fontSize: "1.2rem", marginLeft: 1 }} />
+            </Button>
+          </Box>
+        ) : null}
+
+        {currentuser?.role !== "admin" ? (
+          <Box sx={{ mt: 1, display: "flex", justifyContent: "end" }}>
+            <Button
+              onClick={() =>
+                currentuser
+                  ? isFavourited
+                    ? handleRemoveFromFavourites()
+                    : handleAddToFavourites()
+                  : handleOpenModal()
+              }
+            >
+              {isFavourited ? (
+                <FavoriteIcon color="error" />
+              ) : (
+                <FavoriteBorderIcon />
+              )}
+            </Button>
+          </Box>
+        ) : null}
       </Box>
 
-      {/* Main two-column layout */}
-      <Paper maxWidth="md" sx={{ mx: 2, p: 5 }}>
-        <Container>
-          <Typography variant="h5" sx={{ my: 2 }}>
+      <Container maxWidth="md" sx={{ pb: 6 }}>
+        <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h5" gutterBottom>
             Description
           </Typography>
           <Typography>{story.description}</Typography>
-        </Container>
-        <Container>
-          <Typography variant="h5" sx={{ my: 3 }}>
-            Chapter List
+        </Paper>
+
+        {/* chapters */}
+        <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Chapters
           </Typography>
-          <Box
-            sx={{
-              textAlign: "start",
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-              mt: 2,
-            }}
-          >
-            {story.chapters.map((chapter) => (
-              <Button
-                variant="none"
-                component={Link}
-                to={`chapters/${chapter._id}`}
-              >
-                <Box
+          {story.chapters.length > 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {story.chapters.map((chapter) => (
+                <Button
+                  key={chapter._id}
+                  component={Link}
+                  to={`chapters/${chapter._id}`}
+                  color="black"
                   sx={{
-                    display: "flex",
                     justifyContent: "space-between",
-                    width: "100%",
+                    textTransform: "none",
+                    px: 2,
+                    py: 1,
+                    borderRadius: 2,
+                    "&:hover": { backgroundColor: "action.hover" },
                   }}
                 >
-                  <Typography>Chapter {chapter.chapterNumber}</Typography>
-                  <Typography>by {chapter.author.name}</Typography>
-                </Box>
-              </Button>
-            ))}
-          </Box>
-        </Container>
-        <Container>
+                  <Typography sx={{ fontWeight: "bold" }}>
+                    Chapter {chapter.chapterNumber}
+                  </Typography>
+                  <Typography color="text.secondary" fontSize="0.9rem">
+                    by {chapter.author.name}
+                  </Typography>
+                </Button>
+              ))}
+            </Box>
+          ) : (
+            <Typography color="text.secondary">No chapters yet.</Typography>
+          )}
+        </Paper>
+
+        {/* current round */}
+        <Paper elevation={2} sx={{ p: 3 }}>
           <Box
             sx={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              mb: 2,
+              flexWrap: "wrap",
             }}
           >
-            <Typography variant="h5" sx={{ my: 2 }}>
+            <Typography variant="h5">
               Current Round: Chapter {story.currentRound.chapterNumber}
             </Typography>
             {isHiatus ? (
-              <Typography variant="h5" color="error">
+              <Typography variant="h6" color="error">
                 On Hiatus
               </Typography>
             ) : (
-              <Typography variant="h5">
-                Votes counted in{" "}
-                {formatDistanceToNow(new Date(story.currentRound.deadline))}
+              <Typography variant="body1" color="text.secondary">
+                Votes close in{" "}
+                <Typography
+                  color="black"
+                  component="span"
+                  sx={{ fontWeight: "bold" }}
+                >
+                  {formatDistanceToNow(new Date(story.currentRound.deadline))}
+                </Typography>
               </Typography>
             )}
           </Box>
 
           {isHiatus ? (
             <>
-              {/* If it's hiatus, hide voting/submission section */}
-              <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+              <Typography color="text.secondary">
                 This story is currently on hiatus. New submissions and votes are
                 paused.
               </Typography>
-
-              {/* Author-only controls */}
-              {isAuthor && (
+              {isAuthor || currentuser?.role === "admin" ? (
                 <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleContinueStory(story._id)}
-                  >
+                  <Button variant="contained" color="primary">
                     Resume Story
                   </Button>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    onClick={() => handleEndStory(story._id)}
-                  >
+                  <Button variant="outlined" color="error">
                     End Story
                   </Button>
                 </Box>
-              )}
+              ) : null}
             </>
           ) : (
             <>
-              {/* Normal round voting/submissions UI (your existing code) */}
+              {/* submissions */}
               <Box
-                sx={{
-                  textAlign: "start",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 1,
-                  mt: 2,
-                }}
+                sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}
               >
-                {submissions.length !== 0 ? (
+                {submissions.length ? (
                   rankedSubmissions.map((submission) => {
                     const hasVotedThis = userVote?.chapter === submission._id;
                     const voteDisabled = userVote && !hasVotedThis;
-
                     return (
-                      <Box
+                      <Paper
                         key={submission._id}
+                        elevation={1}
                         sx={{
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          width: "100%",
+                          px: 2,
+                          py: 1.5,
+                          borderRadius: 2,
                         }}
                       >
                         <Button
-                          variant="none"
                           component={Link}
                           to={`chapters/${submission._id}`}
-                          sx={{ flexGrow: 1, justifyContent: "flex-start" }}
+                          color="black"
+                          sx={{
+                            textTransform: "none",
+                            flexGrow: 1,
+                            textAlign: "left",
+                          }}
                         >
-                          <Typography>
+                          <Typography sx={{ fontWeight: "bold" }}>
                             Submission by {submission.author.name}
                           </Typography>
                         </Button>
 
-                        <Typography>
+                        <Typography sx={{ mx: 2 }}>
                           #{submission.rank} — {submission.votes} votes
                         </Typography>
 
-                        <Button
-                          variant="outlined"
-                          disabled={voteDisabled}
-                          onClick={() => {
-                            if (!currentuser) return handleOpenModal();
-
-                            if (hasVotedThis) {
-                              handleRemoveVote(submission._id);
-                            } else {
-                              handleAddVote(submission._id);
-                            }
-                          }}
-                        >
-                          {hasVotedThis ? "Retract Vote" : "Vote"}
-                        </Button>
-                      </Box>
+                        {currentuser?.role !== "admin" ? (
+                          <Button
+                            variant={hasVotedThis ? "contained" : "outlined"}
+                            color={hasVotedThis ? "error" : "primary"}
+                            disabled={voteDisabled}
+                            onClick={() => {
+                              if (!currentuser) return handleOpenModal();
+                              hasVotedThis
+                                ? handleRemoveVote(submission._id)
+                                : handleAddVote(submission._id);
+                            }}
+                          >
+                            {hasVotedThis ? "Retract" : "Vote"}
+                          </Button>
+                        ) : null}
+                      </Paper>
                     );
                   })
                 ) : (
-                  <>no submissions yet</>
+                  <Typography color="text.secondary">
+                    No submissions yet.
+                  </Typography>
                 )}
               </Box>
 
-              <Button
-                disabled={hasSubmitted}
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  if (!currentuser) {
-                    handleOpenModal();
-                  } else {
+              {currentuser?.role !== "admin" ? (
+                <Button
+                  disabled={hasSubmitted}
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    if (!currentuser) return handleOpenModal();
                     navigate(`/stories/${story._id}/submit`);
-                  }
-                }}
-              >
-                {hasSubmitted
-                  ? "You already have a submission for this round!"
-                  : "Submit a Chapter"}
-              </Button>
+                  }}
+                >
+                  {hasSubmitted
+                    ? "You already have a submission for this round!"
+                    : "Submit a Chapter"}
+                </Button>
+              ) : null}
             </>
           )}
-        </Container>
-      </Paper>
+        </Paper>
+      </Container>
     </>
   );
 };

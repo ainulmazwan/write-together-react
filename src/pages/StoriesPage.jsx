@@ -99,7 +99,7 @@ const StoriesPage = () => {
     <>
       <Header />
       <Box sx={{ maxWidth: 1400, mx: "auto", px: 3, py: 4 }}>
-        {/* Filters */}
+        {/* filters */}
         <Box
           sx={{
             display: "flex",
@@ -183,25 +183,27 @@ const StoriesPage = () => {
                       "&:hover": { transform: "scale(1.02)" },
                     }}
                   >
-                    <IconButton
-                      onClick={() => {
-                        if (!currentuser) handleOpenModal();
-                        else handleFavourite(story._id, isFavourited);
-                      }}
-                      sx={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        backgroundColor: "rgba(255,255,255,0.8)",
-                        "&:hover": { backgroundColor: "rgba(255,255,255,1)" },
-                      }}
-                    >
-                      {isFavourited ? (
-                        <Favorite color="error" />
-                      ) : (
-                        <FavoriteBorder />
-                      )}
-                    </IconButton>
+                    {currentuser?.role !== "admin" ? (
+                      <IconButton
+                        onClick={() => {
+                          if (!currentuser) handleOpenModal();
+                          else handleFavourite(story._id, isFavourited);
+                        }}
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          backgroundColor: "rgba(255,255,255,0.8)",
+                          "&:hover": { backgroundColor: "rgba(255,255,255,1)" },
+                        }}
+                      >
+                        {isFavourited ? (
+                          <Favorite color="error" />
+                        ) : (
+                          <FavoriteBorder />
+                        )}
+                      </IconButton>
+                    ) : null}
                     <CardContent sx={{ flexGrow: 1 }}>
                       <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
                         {story.title}

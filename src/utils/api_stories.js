@@ -66,3 +66,13 @@ export async function advanceRound(storyId) {
   const response = await axios.put(API_URL + "stories/advance/" + storyId);
   return response.data;
 }
+
+// update story
+export async function updateStory(id, updates, token) {
+  const response = await axios.put(API_URL + "stories/" + id, updates, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
+  return response.data;
+}

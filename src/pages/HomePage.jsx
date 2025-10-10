@@ -156,6 +156,8 @@ const HomePage = () => {
               <Grid key={2} item size={{ xs: 12, md: 6, lg: 4 }}>
                 <Button
                   fullWidth
+                  component={Link}
+                  to="/stories"
                   sx={{
                     textTransform: "none",
                     p: 0,
