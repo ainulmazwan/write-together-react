@@ -41,8 +41,6 @@ const StoriesPage = () => {
     });
   }, []);
 
-  console.log(genres);
-
   // fetch stories
   useEffect(() => {
     const fetchStories = async () => {
@@ -146,7 +144,7 @@ const StoriesPage = () => {
                   <MenuItem value={genre._id}>{genre.name}</MenuItem>
                 ))
               ) : (
-                <>loading</>
+                <MenuItem value="nogenres">No Genres</MenuItem>
               )}
             </TextField>
             <TextField

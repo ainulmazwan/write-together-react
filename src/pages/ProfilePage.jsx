@@ -14,6 +14,7 @@ import { getStoriesByAuthor } from "../utils/api_stories";
 import { getFavouritedStories } from "../utils/api_users";
 import { getChaptersByAuthor } from "../utils/api_chapters";
 import { useEffect, useState } from "react";
+import { DELETED_STORY_ID } from "../utils/constants";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -169,10 +170,16 @@ const ProfilePage = () => {
                 <Box>
                   <Typography>
                     Chapter {chapter.chapterNumber} |{" "}
-                    <Link to={`/stories/${chapter.story._id}`}>
-                      {chapter.story.title}
-                    </Link>{" "}
-                    (by {chapter.story.author.name})
+                    {chapter.story._id !== DELETED_STORY_ID ? (
+                      <>
+                        <Link to={`/stories/${chapter.story._id}`}>
+                          {chapter.story.title}
+                        </Link>{" "}
+                        by {chapter.story.author.name}
+                      </>
+                    ) : (
+                      <span>{chapter.story.title}</span>
+                    )}
                   </Typography>
                 </Box>
                 <Typography>

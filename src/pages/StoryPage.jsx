@@ -4,7 +4,7 @@ import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Header from "../components/Header";
-import { getStoryById, advanceRound } from "../utils/api_stories";
+import { getStoryById, advanceRound, deleteStory } from "../utils/api_stories";
 import {
   getVotesForSubmission,
   addVote,
@@ -179,6 +179,41 @@ const StoryPage = () => {
     toast.success(`${story.title} removed from favourites`);
   };
 
+  const handleDeleteModal = async () => {
+    try {
+      // get amount of chapters for the story
+      const chapterCount = story.chapters.length;
+      const submissionCount = story.currentRound.submissions.length;
+
+      const result = await Swal.fire({
+        title: "Are you sure you want to delete this story?",
+        html: `
+          <p>This story has <b>${chapterCount}</b> chapters and <b>${submissionCount}</b> submissions.</p><br />
+          <p>Deleting this story will remove it forever(!), but chapters and submissions will still be visible.</p>
+        `,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete story",
+        cancelButtonText: "Cancel",
+      });
+
+      if (result.isConfirmed) {
+        await deleteStory(id, currentuser.token);
+        toast.success("Story deleted successfully");
+        if (isAuthor) {
+          navigate("/profile");
+        } else {
+          navigate("/stories");
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong while deleting story");
+    }
+  };
+
   const isHiatus = story.status === "hiatus";
   const isAuthor = currentuser && currentuser._id === story.author._id;
 
@@ -220,7 +255,13 @@ const StoryPage = () => {
             >
               Edit <ModeIcon sx={{ marginLeft: 1 }} />
             </Button>
-            <Button variant="contained" color="error">
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleDeleteModal();
+              }}
+            >
               Delete <DeleteIcon sx={{ fontSize: "1.2rem", marginLeft: 1 }} />
             </Button>
           </Box>

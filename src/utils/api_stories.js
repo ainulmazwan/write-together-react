@@ -76,3 +76,13 @@ export async function updateStory(id, updates, token) {
   });
   return response.data;
 }
+
+// delete story
+export async function deleteStory(id, token) {
+  const response = await axios.delete(API_URL + "stories/" + id, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
+  return response.data;
+}
