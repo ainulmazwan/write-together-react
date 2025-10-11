@@ -4,7 +4,13 @@ import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Header from "../components/Header";
-import { getStoryById, advanceRound, deleteStory } from "../utils/api_stories";
+import {
+  getStoryById,
+  advanceRound,
+  deleteStory,
+  endStory,
+  resumeStory,
+} from "../utils/api_stories";
 import {
   getVotesForSubmission,
   addVote,
@@ -47,6 +53,8 @@ const StoryPage = () => {
 
   useEffect(() => {
     if (!story?.currentRound?.deadline) return;
+
+    if (story?.status === "completed") return;
 
     const now = new Date();
     const deadline = new Date(story.currentRound.deadline);
@@ -118,8 +126,6 @@ const StoryPage = () => {
       else if (result.isDenied) window.location.href = "/signup";
     });
   };
-
-  if (!story || !voteCounts) return <>loading</>;
 
   const sortedSubmissions = [...submissions].sort(
     (a, b) => (voteCounts[b._id] || 0) - (voteCounts[a._id] || 0)
@@ -213,6 +219,68 @@ const StoryPage = () => {
       toast.error("Something went wrong while deleting story");
     }
   };
+
+  const handleEndStoryModal = async () => {
+    try {
+      const submissionCount = story.currentRound.submissions.length;
+
+      const result = await Swal.fire({
+        title: "Are you sure you want to end this story?",
+        html: `
+          <p>This story currently has <b>${submissionCount}</b> submissions.</p><br />
+          <p>This action cannot be undone!</p>
+        `,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, end story",
+        cancelButtonText: "Cancel",
+      });
+
+      if (result.isConfirmed) {
+        await endStory(id, currentuser.token);
+        const updatedStory = await getStoryById(id);
+        setStory(updatedStory);
+        toast.success("Story ended successfully");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleResumeStoryModal = async () => {
+    try {
+      const deadline = new Date(story.currentRound.deadline);
+      const result = await Swal.fire({
+        title: "Are you sure you want to resume this story?",
+        html: `
+          <p>The next round will end <b>${formatDistanceToNow(
+            deadline
+          )} from now</b>.</p><br />
+        `,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, resume story",
+        cancelButtonText: "Cancel",
+      });
+
+      if (result.isConfirmed) {
+        await resumeStory(id, currentuser.token);
+        const updatedStory = await getStoryById(id);
+        setStory(updatedStory);
+        toast.success("Story resumed successfully");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  if (!story || !voteCounts || !story.chapters) return <>loading</>;
 
   const isHiatus = story.status === "hiatus";
   const isAuthor = currentuser && currentuser._id === story.author._id;
@@ -322,7 +390,7 @@ const StoryPage = () => {
                     Chapter {chapter.chapterNumber}
                   </Typography>
                   <Typography color="text.secondary" fontSize="0.9rem">
-                    by {chapter.author.name}
+                    by {chapter.author?.name || "Unknown Author"}
                   </Typography>
                 </Button>
               ))}
@@ -334,136 +402,182 @@ const StoryPage = () => {
 
         {/* current round */}
         <Paper elevation={2} sx={{ p: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-              flexWrap: "wrap",
-            }}
-          >
-            <Typography variant="h5">
-              Current Round: Chapter {story.currentRound.chapterNumber}
-            </Typography>
-            {isHiatus ? (
-              <Typography variant="h6" color="error">
-                On Hiatus
-              </Typography>
-            ) : (
-              <Typography variant="body1" color="text.secondary">
-                Votes close in{" "}
-                <Typography
-                  color="black"
-                  component="span"
-                  sx={{ fontWeight: "bold" }}
-                >
-                  {formatDistanceToNow(new Date(story.currentRound.deadline))}
-                </Typography>
-              </Typography>
-            )}
-          </Box>
-
-          {isHiatus ? (
+          {story?.status !== "completed" ? (
             <>
-              <Typography color="text.secondary">
-                This story is currently on hiatus. New submissions and votes are
-                paused.
-              </Typography>
-              {isAuthor || currentuser?.role === "admin" ? (
-                <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
-                  <Button variant="contained" color="primary">
-                    Resume Story
-                  </Button>
-                  <Button variant="outlined" color="error">
-                    End Story
-                  </Button>
-                </Box>
-              ) : null}
-            </>
-          ) : (
-            <>
-              {/* submissions */}
               <Box
-                sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
+                  flexWrap: "wrap",
+                }}
               >
-                {submissions.length ? (
-                  rankedSubmissions.map((submission) => {
-                    const hasVotedThis = userVote?.chapter === submission._id;
-                    const voteDisabled = userVote && !hasVotedThis;
-                    return (
-                      <Paper
-                        key={submission._id}
-                        elevation={1}
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          px: 2,
-                          py: 1.5,
-                          borderRadius: 2,
-                        }}
-                      >
-                        <Button
-                          component={Link}
-                          to={`chapters/${submission._id}`}
-                          color="black"
-                          sx={{
-                            textTransform: "none",
-                            flexGrow: 1,
-                            textAlign: "left",
-                          }}
-                        >
-                          <Typography sx={{ fontWeight: "bold" }}>
-                            Submission by {submission.author.name}
-                          </Typography>
-                        </Button>
-
-                        <Typography sx={{ mx: 2 }}>
-                          #{submission.rank} — {submission.votes} votes
-                        </Typography>
-
-                        {currentuser?.role !== "admin" ? (
-                          <Button
-                            variant={hasVotedThis ? "contained" : "outlined"}
-                            color={hasVotedThis ? "error" : "primary"}
-                            disabled={voteDisabled}
-                            onClick={() => {
-                              if (!currentuser) return handleOpenModal();
-                              hasVotedThis
-                                ? handleRemoveVote(submission._id)
-                                : handleAddVote(submission._id);
-                            }}
-                          >
-                            {hasVotedThis ? "Retract" : "Vote"}
-                          </Button>
-                        ) : null}
-                      </Paper>
-                    );
-                  })
+                <Typography variant="h5">
+                  Current Round: Chapter {story.currentRound.chapterNumber}
+                </Typography>
+                {isHiatus ? (
+                  <Typography variant="h6" color="error">
+                    On Hiatus
+                  </Typography>
                 ) : (
-                  <Typography color="text.secondary">
-                    No submissions yet.
+                  <Typography variant="body1" color="text.secondary">
+                    Votes close in{" "}
+                    <Typography
+                      color="black"
+                      component="span"
+                      sx={{ fontWeight: "bold" }}
+                    >
+                      {formatDistanceToNow(
+                        new Date(story.currentRound.deadline)
+                      )}
+                    </Typography>
                   </Typography>
                 )}
               </Box>
 
-              {currentuser?.role !== "admin" ? (
-                <Button
-                  disabled={hasSubmitted}
-                  variant="contained"
-                  color="primary"
-                  onClick={() => {
-                    if (!currentuser) return handleOpenModal();
-                    navigate(`/stories/${story._id}/submit`);
-                  }}
-                >
-                  {hasSubmitted
-                    ? "You already have a submission for this round!"
-                    : "Submit a Chapter"}
-                </Button>
-              ) : null}
+              {isHiatus ? (
+                <>
+                  <Typography color="text.secondary">
+                    This story is currently on hiatus. New submissions and votes
+                    are paused.
+                  </Typography>
+                  {isAuthor || currentuser?.role === "admin" ? (
+                    <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleResumeStoryModal}
+                      >
+                        Resume Story
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={handleEndStoryModal}
+                      >
+                        End Story
+                      </Button>
+                    </Box>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  {/* submissions */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                      mb: 3,
+                    }}
+                  >
+                    {submissions.length ? (
+                      rankedSubmissions.map((submission) => {
+                        const hasVotedThis =
+                          userVote?.chapter === submission._id;
+                        const voteDisabled = userVote && !hasVotedThis;
+                        return (
+                          <Paper
+                            key={submission._id}
+                            elevation={1}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              px: 2,
+                              py: 1.5,
+                              borderRadius: 2,
+                            }}
+                          >
+                            <Button
+                              component={Link}
+                              to={`chapters/${submission._id}`}
+                              color="black"
+                              sx={{
+                                textTransform: "none",
+                                flexGrow: 1,
+                                textAlign: "left",
+                              }}
+                            >
+                              <Typography sx={{ fontWeight: "bold" }}>
+                                Submission by {submission.author.name}
+                              </Typography>
+                            </Button>
+
+                            <Typography sx={{ mx: 2 }}>
+                              #{submission.rank} — {submission.votes} votes
+                            </Typography>
+
+                            {currentuser?.role !== "admin" ? (
+                              <Button
+                                variant={
+                                  hasVotedThis ? "contained" : "outlined"
+                                }
+                                color={hasVotedThis ? "error" : "primary"}
+                                disabled={voteDisabled}
+                                onClick={() => {
+                                  if (!currentuser) return handleOpenModal();
+                                  hasVotedThis
+                                    ? handleRemoveVote(submission._id)
+                                    : handleAddVote(submission._id);
+                                }}
+                              >
+                                {hasVotedThis ? "Retract" : "Vote"}
+                              </Button>
+                            ) : null}
+                          </Paper>
+                        );
+                      })
+                    ) : (
+                      <Typography color="text.secondary">
+                        No submissions yet.
+                      </Typography>
+                    )}
+                  </Box>
+
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    {currentuser?.role !== "admin" ? (
+                      <Button
+                        disabled={hasSubmitted}
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                          if (!currentuser) return handleOpenModal();
+                          navigate(`/stories/${story._id}/submit`);
+                        }}
+                      >
+                        {hasSubmitted
+                          ? "You already have a submission for this round!"
+                          : "Submit a Chapter"}
+                      </Button>
+                    ) : null}
+                    {story?.status === "ongoing" &&
+                    (isAuthor || currentuser?.role === "admin") ? (
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={handleEndStoryModal}
+                      >
+                        End Story
+                      </Button>
+                    ) : null}
+                  </Box>
+                </>
+              )}
             </>
+          ) : (
+            <Box sx={{ textAlign: "center", py: 4 }}>
+              <Typography variant="h5" color="success" sx={{ fontWeight: 700 }}>
+                This story is completed.
+              </Typography>
+              <Typography color="text.secondary" sx={{ mt: 1 }}>
+                You can still view all chapters and submissions, but no new
+                content or votes can be added.
+              </Typography>
+            </Box>
           )}
         </Paper>
       </Container>

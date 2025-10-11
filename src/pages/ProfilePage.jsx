@@ -44,8 +44,6 @@ const ProfilePage = () => {
     });
   }, [currentuser]);
 
-  console.log(currentuser);
-
   return (
     <>
       <Header />
@@ -63,13 +61,6 @@ const ProfilePage = () => {
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
             {currentuser?.email}
-          </Typography>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="body2" color="text.secondary">
-            Member since{" "}
-            {currentuser?.createdAt
-              ? format(new Date(currentuser.createdAt), "MMMM yyyy")
-              : "Unknown"}
           </Typography>
         </Box>
       </Container>
@@ -113,7 +104,7 @@ const ProfilePage = () => {
                               : "#fff3e0",
                           }}
                         >
-                          {isPublished ? "Published" : "Unpublished"}
+                          {isPublished ? story.status : "Unpublished"}
                         </Typography>
                       </Box>
 

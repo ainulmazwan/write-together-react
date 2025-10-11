@@ -177,8 +177,6 @@ const StoriesPage = () => {
                       flexDirection: "column",
                       position: "relative",
                       boxShadow: 3,
-                      transition: "transform 0.2s",
-                      "&:hover": { transform: "scale(1.02)" },
                     }}
                   >
                     {currentuser?.role !== "admin" ? (
@@ -191,8 +189,7 @@ const StoriesPage = () => {
                           position: "absolute",
                           top: 8,
                           right: 8,
-                          backgroundColor: "rgba(255,255,255,0.8)",
-                          "&:hover": { backgroundColor: "rgba(255,255,255,1)" },
+                          backgroundColor: "rgba(255,255,255,0.8)"
                         }}
                       >
                         {isFavourited ? (

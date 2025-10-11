@@ -86,3 +86,30 @@ export async function deleteStory(id, token) {
   });
   return response.data;
 }
+
+// end story
+export async function endStory(id, token) {
+  const response = await axios.put(
+    API_URL + "stories/" + id + "/end",
+    {}, // no body needed
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
+  return response.data;
+}
+
+// resume story
+export async function resumeStory(id, token) {
+  const response = await axios.put(
+    API_URL + "stories/" + id + "/resume",
+    {},
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
+}
