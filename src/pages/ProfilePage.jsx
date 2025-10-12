@@ -149,6 +149,7 @@ const ProfilePage = () => {
           ) : (
             chaptersByUser.map((chapter) => (
               <Button
+                key={chapter._id}
                 component={Link}
                 to={`/stories/${chapter.story._id}/chapters/${chapter._id}`}
                 variant="none"

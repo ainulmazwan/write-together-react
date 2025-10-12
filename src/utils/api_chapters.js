@@ -24,3 +24,22 @@ export async function addChapter(storyId, content, authorId) {
   });
   return response.data;
 }
+
+export async function updateChapter(chapterId, updates, token) {
+  const response = await axios.put(API_URL + "chapters/" + chapterId, updates, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
+  return response.data;
+}
+
+export async function deleteChapter(chapterId, token) {
+  console.log(token);
+  const response = await axios.delete(API_URL + "chapters/" + chapterId, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
+  return response.data;
+}

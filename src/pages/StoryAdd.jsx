@@ -122,7 +122,7 @@ const StoryAdd = () => {
                     <MenuItem value={genre._id}>{genre.name}</MenuItem>
                   ))
                 ) : (
-                  <>no genres</>
+                  <MenuItem>No Genre</MenuItem>
                 )}
               </Select>
             </FormControl>

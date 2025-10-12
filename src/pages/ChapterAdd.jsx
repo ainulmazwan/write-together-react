@@ -7,7 +7,7 @@ import { getStoryById } from "../utils/api_stories";
 import { addChapter } from "../utils/api_chapters";
 import { toast } from "sonner";
 
-const SubmissionAdd = () => {
+const ChapterAdd = () => {
   const [cookies] = useCookies(["currentuser"]);
   const { currentuser } = cookies;
   const navigate = useNavigate();
@@ -115,4 +115,4 @@ const SubmissionAdd = () => {
   );
 };
 
-export default SubmissionAdd;
+export default ChapterAdd;

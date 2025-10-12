@@ -30,6 +30,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ModeIcon from "@mui/icons-material/Mode";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { DELETED_CHAPTER_ID } from "../utils/constants";
 
 const StoryPage = () => {
   const { id } = useParams();
@@ -49,7 +50,7 @@ const StoryPage = () => {
   useEffect(() => {
     getStoryById(id).then((data) => setStory(data));
     getSubmissionsForCurrentRound(id).then((data) => setSubmissions(data));
-  }, [id, navigate]);
+  }, [id]);
 
   useEffect(() => {
     if (!story?.currentRound?.deadline) return;
@@ -371,11 +372,12 @@ const StoryPage = () => {
           </Typography>
           {story.chapters.length > 0 ? (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {story.chapters.map((chapter) => (
+              {story.chapters.map((chapter, index) => (
                 <Button
                   key={chapter._id}
                   component={Link}
                   to={`chapters/${chapter._id}`}
+                  disabled={chapter._id === DELETED_CHAPTER_ID}
                   color="black"
                   sx={{
                     justifyContent: "space-between",
@@ -387,10 +389,12 @@ const StoryPage = () => {
                   }}
                 >
                   <Typography sx={{ fontWeight: "bold" }}>
-                    Chapter {chapter.chapterNumber}
+                    Chapter {index + 1}
                   </Typography>
                   <Typography color="text.secondary" fontSize="0.9rem">
-                    by {chapter.author?.name || "Unknown Author"}
+                    {chapter._id === DELETED_CHAPTER_ID
+                      ? "[Deleted Chapter]"
+                      : `by ${chapter.author?.name || "Unknown Author"}`}
                   </Typography>
                 </Button>
               ))}
