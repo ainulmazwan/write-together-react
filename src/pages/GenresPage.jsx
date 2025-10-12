@@ -59,7 +59,7 @@ const GenresPage = () => {
     }).then(async (result) => {
       if (!result.value) {
       } else {
-        await addGenre(result.value);
+        await addGenre(result.value, currentuser.token);
         const updatedGenres = await getGenres();
         setGenres(updatedGenres);
         toast.success(`Genre "${result.value}" added!`);
@@ -76,7 +76,7 @@ const GenresPage = () => {
       inputValue: genre.name,
       inputPlaceholder: "Enter updated genre name",
       showCancelButton: true,
-      confirmButtonText: "Add Genre",
+      confirmButtonText: "Edit Genre",
       cancelButtonText: "Cancel",
       confirmButtonColor: "#1976d2",
       cancelButtonColor: "#9e9e9e",
@@ -88,7 +88,7 @@ const GenresPage = () => {
     }).then(async (result) => {
       if (!result.value) {
       } else {
-        await editGenre(id, result.value);
+        await editGenre(id, result.value, currentuser.token);
         const updatedGenres = await getGenres();
         setGenres(updatedGenres);
         toast.success(`Genre edited!`);
@@ -109,7 +109,7 @@ const GenresPage = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await deleteGenre(id);
+          await deleteGenre(id, currentuser.token);
           const updatedGenres = await getGenres();
           setGenres(updatedGenres);
         } catch (error) {

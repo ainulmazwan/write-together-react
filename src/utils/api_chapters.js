@@ -6,8 +6,12 @@ export async function getChapter(id) {
   return response.data;
 }
 
-export async function getChaptersByAuthor(authorId) {
-  const response = await axios.get(API_URL + "chapters/author/" + authorId);
+export async function getChaptersByAuthor(authorId, token) {
+  const response = await axios.get(API_URL + "chapters/author/" + authorId, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
   return response.data;
 }
 
@@ -16,12 +20,20 @@ export async function getSubmissionsForCurrentRound(storyId) {
   return response.data;
 }
 
-export async function addChapter(storyId, content, authorId) {
-  const response = await axios.post(API_URL + "chapters", {
-    storyId,
-    content,
-    authorId,
-  });
+export async function addChapter(storyId, content, authorId, token) {
+  const response = await axios.post(
+    API_URL + "chapters",
+    {
+      storyId,
+      content,
+      authorId,
+    },
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
   return response.data;
 }
 

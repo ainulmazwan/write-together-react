@@ -23,23 +23,41 @@ export async function getUserById(id) {
   return response.data;
 }
 
-export async function addToFavourites(userId, storyId) {
+export async function addToFavourites(userId, storyId, token) {
   const response = await axios.post(
-    API_URL + "users/" + userId + "/favourites/" + storyId
+    API_URL + "users/" + userId + "/favourites/" + storyId,
+    {},
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
   );
   return response.data;
 }
 
-export async function removeFromFavourites(userId, storyId) {
+export async function removeFromFavourites(userId, storyId, token) {
   const response = await axios.delete(
-    API_URL + "users/" + userId + "/favourites/" + storyId
+    API_URL + "users/" + userId + "/favourites/" + storyId,
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
   );
   return response.data;
 }
 
 // get favourited stories
-export async function getFavouritedStories(userId) {
-  const response = await axios.get(API_URL + "users/" + userId + "/favourites");
+export async function getFavouritedStories(userId, token) {
+  const response = await axios.get(
+    API_URL + "users/" + userId + "/favourites",
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
   return response.data;
 }
 

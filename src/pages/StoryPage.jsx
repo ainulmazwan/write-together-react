@@ -96,8 +96,9 @@ const StoryPage = () => {
       try {
         const counts = {};
         for (const submission of submissions) {
+          // for submission in submissions
           const votes = await getVotesForSubmission(submission._id);
-          counts[submission._id] = votes.length;
+          counts[submission._id] = votes.length; // { m1830m20a9df : 2} contoh
         }
         setVoteCounts(counts);
       } catch (error) {
@@ -109,7 +110,9 @@ const StoryPage = () => {
 
   useEffect(() => {
     if (!currentuser) return;
-    getVote(currentuser._id, id).then((data) => setUserVote(data));
+    getVote(currentuser._id, id, currentuser.token).then((data) =>
+      setUserVote(data)
+    );
   }, [currentuser, story]);
 
   const handleOpenModal = async () => {
@@ -147,7 +150,9 @@ const StoryPage = () => {
   const handleAddVote = async (chapterId) => {
     const userId = currentuser._id;
     const storyId = id;
-    await addVote(userId, chapterId, storyId).then((data) => setUserVote(data));
+    await addVote(userId, chapterId, storyId, currentuser.token).then((data) =>
+      setUserVote(data)
+    );
     setVoteCounts((prev) => ({
       ...prev,
       [chapterId]: (prev[chapterId] || 0) + 1,
@@ -157,7 +162,7 @@ const StoryPage = () => {
 
   const handleRemoveVote = async (chapterId) => {
     const userId = currentuser._id;
-    await removeVote(userId, chapterId);
+    await removeVote(userId, chapterId, currentuser.token);
     setUserVote(null);
     setVoteCounts((prev) => ({
       ...prev,

@@ -6,21 +6,41 @@ export async function getGenres() {
   return response.data;
 }
 
-export async function addGenre(name) {
-  const response = await axios.post(API_URL + "genres", {
-    name,
-  });
+export async function addGenre(name, token) {
+  const response = await axios.post(
+    API_URL + "genres",
+    {
+      name,
+    },
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
   return response.data;
 }
 
-export async function editGenre(id, name) {
-  const response = await axios.put(API_URL + "genres/" + id, {
-    name,
-  });
+export async function editGenre(id, name, token) {
+  const response = await axios.put(
+    API_URL + "genres/" + id,
+    {
+      name,
+    },
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
   return response.data;
 }
 
-export async function deleteGenre(id) {
-  const response = await axios.delete(API_URL + "genres/" + id);
+export async function deleteGenre(id, token) {
+  const response = await axios.delete(API_URL + "genres/" + id, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
   return response.data;
 }

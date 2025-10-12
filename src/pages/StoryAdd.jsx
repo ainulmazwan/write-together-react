@@ -70,7 +70,8 @@ const StoryAdd = () => {
         publishDate.toISOString(),
         votingWindow,
         deadline,
-        chapterContent
+        chapterContent,
+        currentuser.token
       );
 
       toast.success(`Story "${story.title}" created!`);

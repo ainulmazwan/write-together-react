@@ -31,15 +31,15 @@ const ProfilePage = () => {
       return;
     }
 
-    getStoriesByAuthor(currentuser._id).then((data) => {
+    getStoriesByAuthor(currentuser._id, currentuser.token).then((data) => {
       setStoriesByUser(data);
     });
 
-    getChaptersByAuthor(currentuser._id).then((data) => {
+    getChaptersByAuthor(currentuser._id, currentuser.token).then((data) => {
       setChaptersByUser(data);
     });
 
-    getFavouritedStories(currentuser._id).then((data) => {
+    getFavouritedStories(currentuser._id, currentuser.token).then((data) => {
       setFavouritedStories(data);
     });
   }, [currentuser]);

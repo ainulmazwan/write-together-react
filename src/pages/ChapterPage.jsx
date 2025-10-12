@@ -47,7 +47,7 @@ const ChapterPage = () => {
     if (!currentuser) {
       return;
     }
-    getVote(currentuser?._id, id).then((data) => {
+    getVote(currentuser?._id, id, currentuser.token).then((data) => {
       if (!data) {
         setHasVotedThis(false);
       } else if (data.chapter === chapterId) {
@@ -64,15 +64,15 @@ const ChapterPage = () => {
   }
 
   const handleAddVote = async () => {
-    await addVote(currentuser._id, chapterId, id).then((data) =>
-      setHasVotedThis(true)
+    await addVote(currentuser._id, chapterId, id, currentuser.token).then(
+      (data) => setHasVotedThis(true)
     );
     toast.success("Vote added!");
   };
 
   const handleRemoveVote = async () => {
-    await removeVote(currentuser._id, chapterId, id).then((data) =>
-      setHasVotedThis(false)
+    await removeVote(currentuser._id, chapterId, currentuser.token).then(
+      (data) => setHasVotedThis(false)
     );
     toast.success("Vote retracted!");
   };

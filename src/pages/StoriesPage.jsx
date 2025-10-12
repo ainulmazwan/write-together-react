@@ -79,15 +79,27 @@ const StoriesPage = () => {
     try {
       let updatedUser;
       if (isFavourited) {
-        updatedUser = await removeFromFavourites(currentuser._id, storyId);
+        updatedUser = await removeFromFavourites(
+          currentuser._id,
+          storyId,
+          currentuser.token
+        );
         setFavourites((prev) => prev.filter((id) => id !== storyId));
         toast.success("Removed from favourites");
       } else {
-        updatedUser = await addToFavourites(currentuser._id, storyId);
+        updatedUser = await addToFavourites(
+          currentuser._id,
+          storyId,
+          currentuser.token
+        );
         setFavourites((prev) => [...prev, storyId]);
         toast.success("Added to favourites");
       }
-      setCookie("currentuser", updatedUser, { path: "/" });
+      setCookie(
+        "currentuser",
+        { ...updatedUser, token: currentuser.token }, // because add/remove from favourites doesnt return a token
+        { path: "/" }
+      );
     } catch (error) {
       toast.error("Error updating favourites");
     }
@@ -189,7 +201,7 @@ const StoriesPage = () => {
                           position: "absolute",
                           top: 8,
                           right: 8,
-                          backgroundColor: "rgba(255,255,255,0.8)"
+                          backgroundColor: "rgba(255,255,255,0.8)",
                         }}
                       >
                         {isFavourited ? (

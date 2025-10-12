@@ -59,7 +59,7 @@ const ChapterAdd = () => {
     if (!content) {
       toast.error("You must fill in all the fields");
     } else {
-      await addChapter(story._id, content, currentuser._id);
+      await addChapter(story._id, content, currentuser._id, currentuser.token);
       toast.success(
         `Created submission for chapter ${story.currentRound.chapterNumber} of ${story.title}`
       );

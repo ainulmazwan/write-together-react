@@ -9,18 +9,27 @@ export async function addStory(
   publishDate,
   votingWindow,
   deadline,
-  chapterContent
+  chapterContent,
+  token
 ) {
-  const response = await axios.post(API_URL + "stories", {
-    title,
-    description,
-    genre,
-    author,
-    publishDate,
-    votingWindow,
-    deadline,
-    chapterContent,
-  });
+  const response = await axios.post(
+    API_URL + "stories",
+    {
+      title,
+      description,
+      genre,
+      author,
+      publishDate,
+      votingWindow,
+      deadline,
+      chapterContent,
+    },
+    {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
   return response.data;
 }
 
@@ -29,8 +38,12 @@ export async function getStoryById(id) {
   return response.data;
 }
 
-export async function getStoriesByAuthor(id) {
-  const response = await axios.get(API_URL + "stories/author/" + id);
+export async function getStoriesByAuthor(id, token) {
+  const response = await axios.get(API_URL + "stories/author/" + id, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  });
   return response.data;
 }
 
