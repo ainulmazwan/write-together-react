@@ -9,14 +9,21 @@ import TextField from "@mui/material/TextField";
 import { signup } from "../utils/api_users";
 import { useCookies } from "react-cookie";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import Header from "../components/Header";
 
 const SignupPage = () => {
-  const [cookies, setCookie, removeCookie] = useCookies(["currentuser"]);
+  const [cookies, setCookie] = useCookies(["currentuser"]);
+  const { currentuser } = cookies;
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (currentuser) {
+      navigate("/");
+    }
+  }, [currentuser]);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

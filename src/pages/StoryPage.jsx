@@ -10,6 +10,7 @@ import {
   deleteStory,
   endStory,
   resumeStory,
+  incrementViews,
 } from "../utils/api_stories";
 import {
   getVotesForSubmission,
@@ -31,6 +32,8 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ModeIcon from "@mui/icons-material/Mode";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { DELETED_CHAPTER_ID } from "../utils/constants";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { handleOpenModal } from "../utils/handle_open_modal";
 
 const StoryPage = () => {
   const { id } = useParams();
@@ -50,12 +53,13 @@ const StoryPage = () => {
   useEffect(() => {
     getStoryById(id).then((data) => setStory(data));
     getSubmissionsForCurrentRound(id).then((data) => setSubmissions(data));
+    incrementViews(id);
   }, [id]);
 
   useEffect(() => {
-    if (!story?.currentRound?.deadline) return;
-
-    if (story?.status === "completed") return;
+    if (!story?.currentRound?.deadline) {
+      return;
+    }
 
     const now = new Date();
     const deadline = new Date(story.currentRound.deadline);
@@ -75,10 +79,15 @@ const StoryPage = () => {
       handleAdvance();
     }
 
-    if (!currentuser) return;
+    if (!currentuser) {
+      return;
+    }
 
     getUserById(currentuser._id).then((data) => {
-      if (data.favourites.includes(id)) setIsFavourited(true);
+      console.log(data.favourites);
+      if (data.favourites.includes(id)) {
+        setIsFavourited(true);
+      }
     });
   }, [story, currentuser]);
 
@@ -115,28 +124,18 @@ const StoryPage = () => {
     );
   }, [currentuser, story]);
 
-  const handleOpenModal = async () => {
-    Swal.fire({
-      title: "Login Required",
-      text: "You need to be logged in to access this feature",
-      icon: "warning",
-      showCancelButton: true,
-      showDenyButton: true,
-      confirmButtonText: "Login",
-      denyButtonText: "Sign Up",
-      cancelButtonText: "Cancel",
-    }).then((result) => {
-      if (result.isConfirmed) window.location.href = "/login";
-      else if (result.isDenied) window.location.href = "/signup";
-    });
-  };
-
   const sortedSubmissions = [...submissions].sort(
     (a, b) => (voteCounts[b._id] || 0) - (voteCounts[a._id] || 0)
   );
 
   let lastVoteCount = null;
   let lastRank = 0;
+
+  /*
+    since submissions are already sorted, submission n will always have either more/the same number of votes than submission n+1
+    if submission share the same no. of votes with the previous, lastRank will not change (they will share the same rank)
+    if submission has different number than the last (less votes), lastRank will be index+1 (since index will always increment)
+  */
 
   const rankedSubmissions = sortedSubmissions.map((sub, index) => {
     const votes = voteCounts[sub._id] || 0;
@@ -172,22 +171,30 @@ const StoryPage = () => {
   };
 
   const handleAddToFavourites = async () => {
-    await addToFavourites(currentuser._id, id);
+    await addToFavourites(currentuser._id, id, currentuser.token);
     setIsFavourited(true);
-    setCookie("currentuser", {
-      ...currentuser,
-      favourites: [...(currentuser.favourites || []), id],
-    });
+    setCookie(
+      "currentuser",
+      {
+        ...currentuser,
+        favourites: [...(currentuser.favourites || []), id],
+      },
+      { path: "/" } // to avoid creating in /stories
+    );
     toast.success(`${story.title} added to favourites`);
   };
 
   const handleRemoveFromFavourites = async () => {
-    await removeFromFavourites(currentuser._id, id);
+    await removeFromFavourites(currentuser._id, id, currentuser.token);
     setIsFavourited(false);
-    setCookie("currentuser", {
-      ...currentuser,
-      favourites: (currentuser.favourites || []).filter((fav) => fav !== id),
-    });
+    setCookie(
+      "currentuser",
+      {
+        ...currentuser,
+        favourites: (currentuser.favourites || []).filter((fav) => fav !== id),
+      },
+      { path: "/" }
+    );
     toast.success(`${story.title} removed from favourites`);
   };
 
@@ -341,15 +348,32 @@ const StoryPage = () => {
           </Box>
         ) : null}
 
-        {currentuser?.role !== "admin" ? (
-          <Box sx={{ mt: 1, display: "flex", justifyContent: "end" }}>
+        <Box
+          sx={{
+            mt: 1,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ display: "flex", alignItems: "center", mx: 2 }}
+          >
+            <VisibilityIcon sx={{ fontSize: "1rem", marginRight: 1 }} />{" "}
+            {story.views} views
+          </Typography>
+          {currentuser?.role !== "admin" ? (
             <Button
               onClick={() =>
                 currentuser
                   ? isFavourited
                     ? handleRemoveFromFavourites()
                     : handleAddToFavourites()
-                  : handleOpenModal()
+                  : handleOpenModal({
+                      text: "You need to be logged in to favourite stories.",
+                    })
               }
             >
               {isFavourited ? (
@@ -358,8 +382,8 @@ const StoryPage = () => {
                 <FavoriteBorderIcon />
               )}
             </Button>
-          </Box>
-        ) : null}
+          ) : null}
+        </Box>
       </Box>
 
       <Container maxWidth="md" sx={{ pb: 6 }}>
@@ -526,7 +550,11 @@ const StoryPage = () => {
                                 color={hasVotedThis ? "error" : "primary"}
                                 disabled={voteDisabled}
                                 onClick={() => {
-                                  if (!currentuser) return handleOpenModal();
+                                  if (!currentuser) {
+                                    return handleOpenModal({
+                                      text: "You need to be logged in to vote.",
+                                    });
+                                  }
                                   hasVotedThis
                                     ? handleRemoveVote(submission._id)
                                     : handleAddVote(submission._id);
@@ -554,7 +582,11 @@ const StoryPage = () => {
                         variant="contained"
                         color="primary"
                         onClick={() => {
-                          if (!currentuser) return handleOpenModal();
+                          if (!currentuser) {
+                            return handleOpenModal({
+                              text: "You need to be logged in to enter a submission.",
+                            });
+                          }
                           navigate(`/stories/${story._id}/submit`);
                         }}
                       >

@@ -3,34 +3,14 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { Link } from "react-router";
 import { useCookies } from "react-cookie";
-import Swal from "sweetalert2";
+import { handleOpenModal } from "../utils/handle_open_modal";
 
 export default function Header() {
   const [cookies, , removeCookie] = useCookies(["currentuser"]);
   const { currentuser } = cookies;
-
-  const handleOpenModal = async () => {
-    Swal.fire({
-      title: "Login Required",
-      text: "You need to be logged in to create a story.",
-      icon: "warning",
-      showCancelButton: true,
-      showDenyButton: true,
-      confirmButtonText: "Login",
-      denyButtonText: "Sign Up",
-      cancelButtonText: "Cancel",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = "/login";
-      } else if (result.isDenied) {
-        window.location.href = "/signup";
-      }
-    });
-  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -75,8 +55,10 @@ export default function Header() {
               <Button
                 color="inherit"
                 onClick={() => {
-                  removeCookie("currentuser");
-                  window.location.href = "/";
+                  setTimeout(() => {
+                    removeCookie("currentuser");
+                    window.location.href = "/";
+                  }, 1000);
                 }}
               >
                 Logout
@@ -105,7 +87,14 @@ export default function Header() {
           {/* not logged in */}
           {!currentuser ? (
             <>
-              <Button color="inherit" onClick={handleOpenModal}>
+              <Button
+                color="inherit"
+                onClick={() =>
+                  handleOpenModal({
+                    text: "You need to be logged in to create a story.",
+                  })
+                }
+              >
                 Create
               </Button>
               <Button color="inherit" component={Link} to="/login">

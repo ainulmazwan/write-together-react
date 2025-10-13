@@ -61,6 +61,9 @@ export async function getStories(genre, status, search, sortBy) {
   if (search !== "") {
     queryParams.search = search;
   }
+  if (sortBy !== "") {
+    queryParams.sortBy = sortBy;
+  }
 
   const queryString = new URLSearchParams(queryParams).toString();
 
@@ -125,4 +128,11 @@ export async function resumeStory(id, token) {
       },
     }
   );
+  return response.data;
+}
+
+// increment views
+export async function incrementViews(id) {
+  const response = await axios.put(API_URL + "stories/" + id + "/view", {});
+  return response.data;
 }

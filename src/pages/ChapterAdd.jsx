@@ -19,7 +19,7 @@ const ChapterAdd = () => {
   const [content, setContent] = useState("");
 
   useEffect(() => {
-    if (!currentuser || hasSubmitted) {
+    if (!currentuser || hasSubmitted || currentuser?.role === "admin") {
       navigate("/");
       return;
     }
@@ -43,7 +43,6 @@ const ChapterAdd = () => {
     }
     const userId = currentuser._id;
     // check if user has already submitted a chapter
-    console.log(story);
     const alreadySubmitted = story.currentRound.submissions.some(
       (submission) => submission.author._id === userId
     );
@@ -71,7 +70,6 @@ const ChapterAdd = () => {
     <>
       <Header />
       <Box sx={{ maxWidth: 700, mx: "auto", mt: 4, p: 3 }}>
-        {/* Chapter info */}
         <Typography variant="h5" gutterBottom>
           Chapter {story.currentRound.chapterNumber}
         </Typography>
@@ -79,7 +77,6 @@ const ChapterAdd = () => {
           {story.title}
         </Typography>
 
-        {/* Submission input */}
         <TextField
           fullWidth
           multiline
@@ -91,7 +88,6 @@ const ChapterAdd = () => {
           sx={{ mt: 2 }}
         />
 
-        {/* Buttons */}
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
           <Button
             variant="text"

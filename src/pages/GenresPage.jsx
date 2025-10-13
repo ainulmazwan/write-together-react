@@ -152,10 +152,7 @@ const GenresPage = () => {
                   <>no genres yet</>
                 ) : (
                   genres.map((genre) => (
-                    <TableRow
-                      key={genre._id}
-                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                    >
+                    <TableRow key={genre._id}>
                       <TableCell component="th" scope="row">
                         {genre.name}
                       </TableCell>

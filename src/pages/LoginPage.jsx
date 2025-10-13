@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
 import { login } from "../utils/api_users";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useCookies } from "react-cookie";
 import { toast } from "sonner";
@@ -15,10 +15,17 @@ import Header from "../components/Header";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [cookies, setCookie, removeCookie] = useCookies(["currentuser"]);
+  const [cookies, setCookie] = useCookies(["currentuser"]);
+  const { currentuser } = cookies;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    if (currentuser) {
+      navigate("/");
+    }
+  }, [currentuser]);
 
   const handleLogin = async () => {
     if (!email || !password) {

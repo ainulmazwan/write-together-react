@@ -59,7 +59,6 @@ const ChapterUpdate = () => {
     <>
       <Header />
       <Box sx={{ maxWidth: 700, mx: "auto", mt: 4, p: 3 }}>
-        {/* Chapter info */}
         <Typography variant="h5" gutterBottom>
           Chapter {chapter.chapterNumber}
         </Typography>
@@ -67,7 +66,6 @@ const ChapterUpdate = () => {
           {story.title}
         </Typography>
 
-        {/* Submission input */}
         <TextField
           fullWidth
           multiline
@@ -79,7 +77,6 @@ const ChapterUpdate = () => {
           sx={{ mt: 2 }}
         />
 
-        {/* Buttons */}
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
           <Button
             variant="text"

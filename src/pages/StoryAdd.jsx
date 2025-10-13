@@ -36,6 +36,9 @@ const StoryAdd = () => {
     if (!currentuser) {
       navigate("/");
       return;
+    } else if (currentuser.role === "admin") {
+      navigate("/");
+      return;
     }
 
     getGenres().then((data) => {
@@ -141,6 +144,7 @@ const StoryAdd = () => {
             <TextField
               label="Voting Window (days)"
               type="number"
+              inputProps={{ min: 1 }}
               fullWidth
               value={votingWindow}
               onChange={(e) => setVotingWindow(e.target.value)}

@@ -47,7 +47,6 @@ export async function updateChapter(chapterId, updates, token) {
 }
 
 export async function deleteChapter(chapterId, token) {
-  console.log(token);
   const response = await axios.delete(API_URL + "chapters/" + chapterId, {
     headers: {
       Authorization: "Bearer " + token,

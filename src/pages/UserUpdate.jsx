@@ -22,7 +22,6 @@ const UserUpdate = () => {
   const navigate = useNavigate();
   const [cookies] = useCookies(["currentuser"]);
   const { currentuser } = cookies;
-  const [user, setUser] = useState(null);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
@@ -30,14 +29,17 @@ const UserUpdate = () => {
   const { userId } = useParams();
 
   useEffect(() => {
-    if (!currentuser || currentuser.role !== "admin") {
+    if (
+      currentuser?.role === "admin" ||
+      currentuser?._id === userId // check if the one editing is the user to be updated
+    ) {
+      getUserById(userId).then((data) => {
+        setName(data.name);
+        setRole(data.role);
+      });
+    } else {
       navigate("/");
     }
-    getUserById(userId).then((data) => {
-      setUser(data);
-      setName(data.name);
-      setRole(data.role);
-    });
   }, [currentuser]);
 
   const handleUpdate = async () => {
@@ -53,7 +55,11 @@ const UserUpdate = () => {
     try {
       await updateUser(userId, updates, currentuser.token);
       toast.success("User successfully updated!");
-      navigate("/users");
+      if (currentuser.role == "admin") {
+        navigate("/users");
+      } else {
+        navigate("/profile");
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to update user.");
@@ -90,17 +96,6 @@ const UserUpdate = () => {
                 }}
               />
             </Box>
-            <FormControl fullWidth>
-              <InputLabel>Role</InputLabel>
-              <Select
-                value={role}
-                label="Genre"
-                onChange={(e) => setRole(e.target.value)}
-              >
-                <MenuItem value="user">User</MenuItem>
-                <MenuItem value="admin">Admin</MenuItem>
-              </Select>
-            </FormControl>
           </CardContent>
           <CardActions>
             <Button variant="contained" fullWidth onClick={handleUpdate}>

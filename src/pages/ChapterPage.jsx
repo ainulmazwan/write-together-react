@@ -64,15 +64,15 @@ const ChapterPage = () => {
   }
 
   const handleAddVote = async () => {
-    await addVote(currentuser._id, chapterId, id, currentuser.token).then(
-      (data) => setHasVotedThis(true)
+    await addVote(currentuser._id, chapterId, id, currentuser.token).then(() =>
+      setHasVotedThis(true)
     );
     toast.success("Vote added!");
   };
 
   const handleRemoveVote = async () => {
-    await removeVote(currentuser._id, chapterId, currentuser.token).then(
-      (data) => setHasVotedThis(false)
+    await removeVote(currentuser._id, chapterId, currentuser.token).then(() =>
+      setHasVotedThis(false)
     );
     toast.success("Vote retracted!");
   };
@@ -100,7 +100,7 @@ const ChapterPage = () => {
       if (result.isConfirmed) {
         await deleteChapter(chapterId, currentuser.token);
         toast.success("Chapter deleted successfully");
-        navigate(`/stories/${id}`);
+        navigate(`/profile`);
       }
     } catch (error) {
       console.error(error);
@@ -150,7 +150,7 @@ const ChapterPage = () => {
           ) : null}
         </Box>
 
-        {/* Chapter Content */}
+        {/* chapter content */}
         <Paper sx={{ p: 3, mt: 4 }}>
           <Typography>{chapter.content}</Typography>
         </Paper>
@@ -172,7 +172,9 @@ const ChapterPage = () => {
                 color={hasVotedThis ? "error" : "primary"}
                 sx={{ mt: 2 }}
                 onClick={() => {
-                  if (!currentuser) return handleOpenModal();
+                  if (!currentuser) {
+                    return handleOpenModal();
+                  }
                   hasVotedThis
                     ? handleRemoveVote(chapterId)
                     : handleAddVote(chapterId);

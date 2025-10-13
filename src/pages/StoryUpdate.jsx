@@ -114,6 +114,7 @@ const StoryUpdate = () => {
             <TextField
               label="Voting Window (days)"
               type="number"
+              inputProps={{ min: 1 }}
               fullWidth
               value={votingWindow}
               helperText="Changes to the voting window will apply to future rounds only."

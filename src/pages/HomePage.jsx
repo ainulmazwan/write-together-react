@@ -7,6 +7,9 @@ import Grid from "@mui/material/Grid";
 import { useNavigate, Link } from "react-router";
 import { useCookies } from "react-cookie";
 import Header from "../components/Header";
+import PersonIcon from "@mui/icons-material/Person";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -16,6 +19,7 @@ const HomePage = () => {
   return (
     <>
       <Header />
+      {/* normal user / visitor view */}
       {currentuser?.role === "user" || !currentuser ? (
         <>
           <Container
@@ -92,6 +96,7 @@ const HomePage = () => {
         </>
       ) : (
         <>
+          {/* admin section */}
           <Container
             maxWidth="lg"
             sx={{
@@ -120,7 +125,6 @@ const HomePage = () => {
                   sx={{
                     textTransform: "none",
                     p: 0,
-                    "&:hover": { backgroundColor: "transparent" },
                   }}
                 >
                   <Card
@@ -128,6 +132,7 @@ const HomePage = () => {
                       width: "100%",
                       minHeight: 150,
                       display: "flex",
+                      textAlign: "left",
                       alignItems: "center",
                       justifyContent: "center",
                       boxShadow: 3,
@@ -136,6 +141,7 @@ const HomePage = () => {
                       "&:hover": {
                         transform: "translateY(-4px)",
                         boxShadow: 6,
+                        backgroundColor: "#eee4f9ff",
                       },
                     }}
                   >
@@ -149,6 +155,7 @@ const HomePage = () => {
                     >
                       Manage Users
                     </Typography>
+                    <PersonIcon sx={{ fontSize: "2.5rem", mx: 2 }} />
                   </Card>
                 </Button>
               </Grid>
@@ -161,7 +168,6 @@ const HomePage = () => {
                   sx={{
                     textTransform: "none",
                     p: 0,
-                    "&:hover": { backgroundColor: "transparent" },
                   }}
                 >
                   <Card
@@ -169,6 +175,7 @@ const HomePage = () => {
                       width: "100%",
                       minHeight: 150,
                       display: "flex",
+                      textAlign: "left",
                       alignItems: "center",
                       justifyContent: "center",
                       boxShadow: 3,
@@ -177,6 +184,7 @@ const HomePage = () => {
                       "&:hover": {
                         transform: "translateY(-4px)",
                         boxShadow: 6,
+                        backgroundColor: "#eee4f9ff",
                       },
                     }}
                   >
@@ -190,6 +198,7 @@ const HomePage = () => {
                     >
                       Manage Stories
                     </Typography>
+                    <MenuBookIcon sx={{ fontSize: "2.5rem", mx: 2 }} />
                   </Card>
                 </Button>
               </Grid>
@@ -201,7 +210,6 @@ const HomePage = () => {
                   sx={{
                     textTransform: "none",
                     p: 0,
-                    "&:hover": { backgroundColor: "transparent" },
                   }}
                 >
                   <Card
@@ -209,6 +217,7 @@ const HomePage = () => {
                       width: "100%",
                       minHeight: 150,
                       display: "flex",
+                      textAlign: "left",
                       alignItems: "center",
                       justifyContent: "center",
                       boxShadow: 3,
@@ -217,6 +226,7 @@ const HomePage = () => {
                       "&:hover": {
                         transform: "translateY(-4px)",
                         boxShadow: 6,
+                        backgroundColor: "#eee4f9ff",
                       },
                     }}
                   >
@@ -230,6 +240,7 @@ const HomePage = () => {
                     >
                       Manage Genres
                     </Typography>
+                    <MenuIcon sx={{ fontSize: "2.5rem", mx: 2 }} />
                   </Card>
                 </Button>
               </Grid>

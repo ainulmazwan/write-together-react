@@ -1,13 +1,8 @@
 import Header from "../components/Header";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import { Link, useNavigate } from "react-router";
 import { useCookies } from "react-cookie";
 import { getStoriesByAuthor } from "../utils/api_stories";
@@ -15,18 +10,26 @@ import { getFavouritedStories } from "../utils/api_users";
 import { getChaptersByAuthor } from "../utils/api_chapters";
 import { useEffect, useState } from "react";
 import { DELETED_STORY_ID } from "../utils/constants";
+import { toast } from "sonner";
+import { addToFavourites, removeFromFavourites } from "../utils/api_users";
+import StoriesGrid from "../components/StoriesGrid";
+import ModeIcon from "@mui/icons-material/Mode";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
 
-  const [cookies] = useCookies(["currentuser"]);
+  const [cookies, setCookie] = useCookies(["currentuser"]);
   const [storiesByUser, setStoriesByUser] = useState([]);
   const [chaptersByUser, setChaptersByUser] = useState([]);
-  const [favouritedStories, setFavouritedStories] = useState([]);
+  const [favouritedStories, setFavouritedStories] = useState([]); // with story object
+  const [favourites, setFavourites] = useState([]); // just the ids
   const { currentuser } = cookies;
 
   useEffect(() => {
     if (!currentuser) {
+      navigate("/");
+      return;
+    } else if (currentuser.role === "admin") {
       navigate("/");
       return;
     }
@@ -42,7 +45,59 @@ const ProfilePage = () => {
     getFavouritedStories(currentuser._id, currentuser.token).then((data) => {
       setFavouritedStories(data);
     });
+
+    if (currentuser?.favourites) {
+      setFavourites(currentuser.favourites.map((id) => id.toString()));
+    } else {
+      setFavourites([]);
+    }
   }, [currentuser]);
+
+  const handleFavourite = async (storyId, isFavourited) => {
+    try {
+      let updatedUser;
+      if (isFavourited) {
+        updatedUser = await removeFromFavourites(
+          currentuser._id,
+          storyId,
+          currentuser.token
+        );
+        setFavourites((prev) => prev.filter((id) => id !== storyId));
+        toast.success("Removed from favourites");
+      } else {
+        updatedUser = await addToFavourites(
+          currentuser._id,
+          storyId,
+          currentuser.token
+        );
+        setFavourites((prev) => [...prev, storyId]);
+        toast.success("Added to favourites");
+      }
+      setCookie(
+        "currentuser",
+        { ...updatedUser, token: currentuser.token }, // because add/remove from favourites doesnt return a token
+        { path: "/" }
+      );
+    } catch (error) {
+      toast.error("Error updating favourites : " + error);
+    }
+  };
+
+  const handleOpenModal = async () => {
+    Swal.fire({
+      title: "Login Required",
+      text: "You need to be logged in to favourite stories.",
+      icon: "warning",
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: "Login",
+      denyButtonText: "Sign Up",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) window.location.href = "/login";
+      else if (result.isDenied) window.location.href = "/signup";
+    });
+  };
 
   return (
     <>
@@ -54,14 +109,25 @@ const ProfilePage = () => {
             borderRadius: "12px",
             bgcolor: "background.paper",
             boxShadow: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-            {currentuser?.name}
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-            {currentuser?.email}
-          </Typography>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              {currentuser?.name}
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+              {currentuser?.email}
+            </Typography>
+          </Box>
+          <Box>
+            <Button component={Link} to={`/users/${currentuser._id}`}>
+              <ModeIcon sx={{ marginRight: 1 }} />
+              Edit Account
+            </Button>
+          </Box>
         </Box>
       </Container>
       <Container maxWidth="lg" sx={{ my: 5 }}>
@@ -69,67 +135,13 @@ const ProfilePage = () => {
           Your Stories ({storiesByUser.length})
         </Typography>
         {/* map all stories by user */}
-        <Grid container spacing={3} sx={{ mx: "auto" }}>
-          {storiesByUser.length === 0 ? (
-            <>no stories yet</>
-          ) : (
-            storiesByUser.map((story) => {
-              const isPublished = new Date(story.publishDate) <= new Date();
-
-              return (
-                <Grid key={story._id} item size={{ xs: 12, md: 6, lg: 4 }}>
-                  <Card>
-                    <CardContent>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography variant="h6" gutterBottom>
-                          {story.title}
-                        </Typography>
-
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            px: 1,
-                            py: 0.3,
-                            borderRadius: "8px",
-                            fontWeight: 500,
-                            color: isPublished ? "green" : "orange",
-                            backgroundColor: isPublished
-                              ? "#e6f4ea"
-                              : "#fff3e0",
-                          }}
-                        >
-                          {isPublished ? story.status : "Unpublished"}
-                        </Typography>
-                      </Box>
-
-                      <Typography variant="body2" color="text.secondary">
-                        {story.author.name}
-                      </Typography>
-                    </CardContent>
-
-                    <CardActions>
-                      <Button
-                        size="small"
-                        variant="contained"
-                        fullWidth
-                        component={Link}
-                        to={`/stories/${story._id}`}
-                      >
-                        View Story
-                      </Button>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              );
-            })
-          )}
-        </Grid>
+        <StoriesGrid
+          stories={storiesByUser}
+          favourites={favourites}
+          currentuser={currentuser}
+          handleFavourite={handleFavourite}
+          handleOpenModal={handleOpenModal}
+        />
       </Container>
       <Container maxWidth="lg" sx={{ my: 5 }}>
         <Typography variant="h4" sx={{ my: 4 }}>
@@ -187,34 +199,14 @@ const ProfilePage = () => {
         <Typography variant="h4" sx={{ py: 4 }}>
           Your Favourites ({favouritedStories.length})
         </Typography>
-        <Grid container spacing={3} sx={{ mx: "auto" }}>
-          {/* map all favourited stories */}
-          {favouritedStories.map((story) => (
-            <Grid key={story._id} item size={{ xs: 12, md: 6, lg: 4 }}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {story.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {story.author?.name}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    fullWidth
-                    component={Link}
-                    to={`/stories/${story._id}`}
-                  >
-                    View Story
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+        {/* map all favourited stories */}
+        <StoriesGrid
+          stories={favouritedStories}
+          favourites={favourites}
+          currentuser={currentuser}
+          handleFavourite={handleFavourite}
+          handleOpenModal={handleOpenModal}
+        />
       </Container>
     </>
   );

@@ -1,19 +1,4 @@
-import {
-  TextField,
-  MenuItem,
-  Box,
-  Grid,
-  Card,
-  CardActions,
-  CardContent,
-  CardMedia,
-  Button,
-  Typography,
-  Container,
-  IconButton,
-} from "@mui/material";
-import { Favorite, FavoriteBorder } from "@mui/icons-material";
-import { Link } from "react-router";
+import { TextField, MenuItem, Box } from "@mui/material";
 import Header from "../components/Header";
 import { getStories } from "../utils/api_stories";
 import { getGenres } from "../utils/api_genres";
@@ -21,7 +6,8 @@ import { addToFavourites, removeFromFavourites } from "../utils/api_users";
 import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { toast } from "sonner";
-import Swal from "sweetalert2";
+import StoriesGrid from "../components/StoriesGrid";
+import { handleOpenModal } from "../utils/handle_open_modal";
 
 const StoriesPage = () => {
   const [stories, setStories] = useState([]);
@@ -32,7 +18,7 @@ const StoriesPage = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [favourites, setFavourites] = useState([]);
   const [cookies, setCookie] = useCookies(["currentuser"]);
-  const { currentuser } = cookies || {};
+  const { currentuser } = cookies;
 
   // get genres
   useEffect(() => {
@@ -58,22 +44,6 @@ const StoriesPage = () => {
       setFavourites([]);
     }
   }, [currentuser]);
-
-  const handleOpenModal = async () => {
-    Swal.fire({
-      title: "Login Required",
-      text: "You need to be logged in to favourite stories.",
-      icon: "warning",
-      showCancelButton: true,
-      showDenyButton: true,
-      confirmButtonText: "Login",
-      denyButtonText: "Sign Up",
-      cancelButtonText: "Cancel",
-    }).then((result) => {
-      if (result.isConfirmed) window.location.href = "/login";
-      else if (result.isDenied) window.location.href = "/signup";
-    });
-  };
 
   const handleFavourite = async (storyId, isFavourited) => {
     try {
@@ -114,6 +84,7 @@ const StoriesPage = () => {
           sx={{
             display: "flex",
             justifyContent: "space-between",
+            flexDirection: { sx: "column", md: "row" },
             gap: 2,
             mb: 4,
           }}
@@ -168,6 +139,7 @@ const StoriesPage = () => {
               sx={{ minWidth: 150, marginLeft: 2 }}
             >
               <MenuItem value="newest">Newest</MenuItem>
+              <MenuItem value="popular">Most Popular</MenuItem>
               <MenuItem value="alphabetical">Alphabetical</MenuItem>
             </TextField>
           </Box>
@@ -175,82 +147,17 @@ const StoriesPage = () => {
 
         {/* stories */}
 
-        <Grid container spacing={3}>
-          {stories.length === 0 ? (
-            <Typography sx={{ mx: "auto", mt: 4 }}>No stories yet</Typography>
-          ) : (
-            stories.map((story) => {
-              const isFavourited = favourites.includes(story._id.toString());
-              return (
-                <Grid key={story._id} item size={{ xs: 12, md: 6, lg: 4 }}>
-                  <Card
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      position: "relative",
-                      boxShadow: 3,
-                    }}
-                  >
-                    {currentuser?.role !== "admin" ? (
-                      <IconButton
-                        onClick={() => {
-                          if (!currentuser) handleOpenModal();
-                          else handleFavourite(story._id, isFavourited);
-                        }}
-                        sx={{
-                          position: "absolute",
-                          top: 8,
-                          right: 8,
-                          backgroundColor: "rgba(255,255,255,0.8)",
-                        }}
-                      >
-                        {isFavourited ? (
-                          <Favorite color="error" />
-                        ) : (
-                          <FavoriteBorder />
-                        )}
-                      </IconButton>
-                    ) : null}
-                    <CardContent sx={{ flexGrow: 1 }}>
-                      <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
-                        {story.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        by {story.author.name}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          mt: 1,
-                          fontWeight: "bold",
-                          color:
-                            story.status === "ongoing"
-                              ? "green"
-                              : story.status === "hiatus"
-                              ? "orange"
-                              : "blue",
-                        }}
-                      >
-                        {story.status.toUpperCase()}
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      <Button
-                        size="small"
-                        variant="contained"
-                        fullWidth
-                        component={Link}
-                        to={`/stories/${story._id}`}
-                      >
-                        View Story
-                      </Button>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              );
-            })
-          )}
-        </Grid>
+        <StoriesGrid
+          stories={stories}
+          favourites={favourites}
+          currentuser={currentuser}
+          handleFavourite={handleFavourite}
+          handleOpenModal={() => {
+            handleOpenModal({
+              text: "You need to be logged in to favourite stories",
+            });
+          }}
+        />
       </Box>
     </>
   );
