@@ -6,6 +6,7 @@ import { Box, Button, TextField, Typography } from "@mui/material";
 import { getStoryById } from "../utils/api_stories";
 import { addChapter } from "../utils/api_chapters";
 import { toast } from "sonner";
+import Loading from "../components/Loading";
 
 const ChapterAdd = () => {
   const [cookies] = useCookies(["currentuser"]);
@@ -50,7 +51,7 @@ const ChapterAdd = () => {
   }, [story]);
 
   if (!story) {
-    return <>Loading..</>;
+    return <Loading />;
   }
 
   const handleSubmit = async () => {

@@ -14,6 +14,7 @@ import ModeIcon from "@mui/icons-material/Mode";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
 import { toast } from "sonner";
+import Loading from "../components/Loading";
 
 /* if chapter is not official 
   AND if chapterNumber is equal to story.currentRound.chapterNumber
@@ -60,7 +61,7 @@ const ChapterPage = () => {
   }, [currentuser]);
 
   if (!chapter || !story) {
-    return <>chapter not found</>;
+    return <Loading />;
   }
 
   const handleAddVote = async () => {
@@ -152,7 +153,9 @@ const ChapterPage = () => {
 
         {/* chapter content */}
         <Paper sx={{ p: 3, mt: 4 }}>
-          <Typography>{chapter.content}</Typography>
+          <Typography sx={{ whiteSpace: "pre-wrap" }}>
+            {chapter.content}
+          </Typography>
         </Paper>
 
         {canVote && currentuser?.role !== "admin" ? (

@@ -34,6 +34,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { DELETED_CHAPTER_ID } from "../utils/constants";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { handleOpenModal } from "../utils/handle_open_modal";
+import Loading from "../components/Loading";
 
 const StoryPage = () => {
   const { id } = useParams();
@@ -306,7 +307,7 @@ const StoryPage = () => {
     }
   };
 
-  if (!story || !voteCounts || !story.chapters) return <>loading</>;
+  if (!story || !voteCounts || !story.chapters) return <Loading />;
 
   const isHiatus = story.status === "hiatus";
   const isAuthor = currentuser && currentuser._id === story.author._id;

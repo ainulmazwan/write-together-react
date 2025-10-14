@@ -24,6 +24,7 @@ import {
   deleteGenre,
 } from "../utils/api_genres";
 import { toast } from "sonner";
+import Loading from "../components/Loading";
 
 const GenresPage = () => {
   const [genres, setGenres] = useState([]);
@@ -118,6 +119,10 @@ const GenresPage = () => {
       }
     });
   };
+
+  if (!genres) {
+    return <Loading />;
+  }
 
   return (
     <>
