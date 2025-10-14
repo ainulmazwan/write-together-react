@@ -6,11 +6,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
-import { getUserById, updateUser } from "../utils/api_users";
+import { getUserById, updateUser, login } from "../utils/api_users";
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -20,7 +16,7 @@ import Header from "../components/Header";
 
 const UserUpdate = () => {
   const navigate = useNavigate();
-  const [cookies] = useCookies(["currentuser"]);
+  const [cookies, setCookie] = useCookies(["currentuser"]);
   const { currentuser } = cookies;
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -43,9 +39,9 @@ const UserUpdate = () => {
   }, [currentuser]);
 
   const handleUpdate = async () => {
-    const updates = { name, role };
+    const updates = { name };
     // include password if changed
-    if (!name || !role) {
+    if (!name) {
       toast.error("Please fill in the updated name");
       return;
     }
@@ -58,6 +54,14 @@ const UserUpdate = () => {
       if (currentuser.role == "admin") {
         navigate("/users");
       } else {
+        setCookie(
+          "currentuser",
+          { ...currentuser, ...updates },
+          {
+            maxAge: 60 * 60 * 8, // expire in 8 hours
+          },
+          { path: "/" }
+        );
         navigate("/profile");
       }
     } catch (error) {

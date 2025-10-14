@@ -42,8 +42,8 @@ const UsersPage = () => {
       // get stories and chapters by user
       const [stories, chapters] = await Promise.all([
         //basically does both promises/awaits at the same time
-        getStoriesByAuthor(id),
-        getChaptersByAuthor(id),
+        getStoriesByAuthor(id, currentuser.token),
+        getChaptersByAuthor(id, currentuser.token),
       ]);
 
       const storyCount = stories.length;

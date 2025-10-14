@@ -84,7 +84,7 @@ const StoriesPage = () => {
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            flexDirection: { sx: "column", md: "row" },
+            flexDirection: { xs: "column", md: "row" },
             gap: 2,
             mb: 4,
           }}

@@ -166,9 +166,14 @@ const ProfilePage = () => {
                 to={`/stories/${chapter.story._id}/chapters/${chapter._id}`}
                 variant="none"
                 sx={{
-                  p: "6px 0px",
+                  p: 2,
                   display: "flex",
                   justifyContent: "space-between",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    boxShadow: 6,
+                    backgroundColor: "#eee4f9ff",
+                  },
                 }}
               >
                 <Box>
@@ -186,7 +191,11 @@ const ProfilePage = () => {
                     )}
                   </Typography>
                 </Box>
-                <Typography>
+                <Typography
+                  sx={{
+                    color: chapter.isOfficial ? "green" : "orange",
+                  }}
+                >
                   {chapter.isOfficial ? "Official" : "Unofficial"}
                 </Typography>
               </Button>

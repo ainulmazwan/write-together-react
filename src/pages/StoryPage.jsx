@@ -50,6 +50,7 @@ const StoryPage = () => {
   const [isFavourited, setIsFavourited] = useState(false);
 
   // get story data and submissions for current round
+  // for all users
   useEffect(() => {
     getStoryById(id).then((data) => setStory(data));
     getSubmissionsForCurrentRound(id).then((data) => setSubmissions(data));
@@ -57,6 +58,7 @@ const StoryPage = () => {
   }, [id]);
 
   useEffect(() => {
+    // advance round if past deadline
     if (!story?.currentRound?.deadline) {
       return;
     }
@@ -79,6 +81,7 @@ const StoryPage = () => {
       handleAdvance();
     }
 
+    // check if story is favourited by logged in user
     if (!currentuser) {
       return;
     }
@@ -91,8 +94,11 @@ const StoryPage = () => {
     });
   }, [story, currentuser]);
 
+  // check if user currently has a submission for story
   useEffect(() => {
-    if (!currentuser) return;
+    if (!currentuser) {
+      return;
+    }
     const userId = currentuser._id;
     const alreadySubmitted = submissions.some(
       (submission) => submission.author._id === userId
@@ -100,6 +106,7 @@ const StoryPage = () => {
     setHasSubmitted(alreadySubmitted);
   }, [currentuser, submissions]);
 
+  // get all the votes for current round and keep in object voteCounts
   useEffect(() => {
     const fetchVotes = async () => {
       try {
@@ -114,18 +121,24 @@ const StoryPage = () => {
         console.error("Error fetching votes:", error);
       }
     };
-    if (submissions.length > 0) fetchVotes();
+    // only run if there are submissions
+    if (submissions.length > 0) {
+      fetchVotes();
+    }
   }, [submissions]);
 
+  // check if logged in user has voted
   useEffect(() => {
-    if (!currentuser) return;
-    getVote(currentuser._id, id, currentuser.token).then((data) =>
-      setUserVote(data)
+    if (!currentuser) {
+      return;
+    }
+    getVote(currentuser._id, id, currentuser.token).then(
+      (data) => setUserVote(data) // {user: "", chapter: "", story: ""}
     );
   }, [currentuser, story]);
 
   const sortedSubmissions = [...submissions].sort(
-    (a, b) => (voteCounts[b._id] || 0) - (voteCounts[a._id] || 0)
+    (a, b) => (voteCounts[b._id] || 0) - (voteCounts[a._id] || 0) // descending order high-low
   );
 
   let lastVoteCount = null;
