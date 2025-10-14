@@ -402,7 +402,7 @@ const StoryPage = () => {
 
       <Container maxWidth="md" sx={{ pb: 6 }}>
         <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h5" gutterBottom sx={{ whiteSpace: "pre-wrap" }}>
             Description
           </Typography>
           <Typography>{story.description}</Typography>

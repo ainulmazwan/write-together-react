@@ -49,14 +49,17 @@ const LoginPage = () => {
   return (
     <>
       <Header />
-      <Typography variant="h3" sx={{ textAlign: "center", my: 5 }}>
-        Log In
-      </Typography>
       <Container maxWidth="md">
-        <Card variant="outlined" sx={{ p: 4 }}>
+        <Card variant="outlined" sx={{ p: 3, my: 5 }}>
           <CardContent>
+            <Typography
+              variant="h4"
+              sx={{ textAlign: "center", mb: 5 }}
+              fontWeight={700}
+            >
+              Log In
+            </Typography>
             <Box mb={2}>
-              <Typography>Email</Typography>
               <TextField
                 label="Email"
                 fullWidth
@@ -67,7 +70,6 @@ const LoginPage = () => {
               />
             </Box>
             <Box mb={2}>
-              <Typography>Password</Typography>
               <TextField
                 type="password"
                 label="Password"

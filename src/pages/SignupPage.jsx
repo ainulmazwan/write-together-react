@@ -54,14 +54,17 @@ const SignupPage = () => {
   return (
     <>
       <Header />
-      <Typography variant="h3" sx={{ textAlign: "center", my: 5 }}>
-        Sign Up
-      </Typography>
       <Container maxWidth="md">
-        <Card variant="outlined" sx={{ p: 4 }}>
+        <Card variant="outlined" sx={{ p: 3, my: 5 }}>
           <CardContent>
+            <Typography
+              variant="h4"
+              sx={{ textAlign: "center", mb: 5 }}
+              fontWeight={700}
+            >
+              Sign Up
+            </Typography>
             <Box mb={2}>
-              <Typography>Name</Typography>
               <TextField
                 label="Name"
                 fullWidth
