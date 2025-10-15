@@ -115,7 +115,7 @@ const StoriesPage = () => {
             </TextField>
             <TextField
               select
-              label="Status"
+              label="Genre"
               value={genre}
               onChange={(e) => setGenre(e.target.value)}
               size="small"

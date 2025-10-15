@@ -75,7 +75,6 @@ const SignupPage = () => {
               />
             </Box>
             <Box mb={2}>
-              <Typography>Email</Typography>
               <TextField
                 label="Email"
                 fullWidth
@@ -86,7 +85,6 @@ const SignupPage = () => {
               />
             </Box>
             <Box mb={2}>
-              <Typography>Password</Typography>
               <TextField
                 type="password"
                 label="Password"
@@ -98,7 +96,6 @@ const SignupPage = () => {
               />
             </Box>
             <Box mb={2}>
-              <Typography>Confirm password</Typography>
               <TextField
                 type="password"
                 label="Confirm password"

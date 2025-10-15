@@ -123,7 +123,7 @@ const ProfilePage = () => {
             </Typography>
           </Box>
           <Box>
-            <Button component={Link} to={`/users/${currentuser._id}`}>
+            <Button component={Link} to={`/users/${currentuser?._id}`}>
               <ModeIcon sx={{ marginRight: 1 }} />
               Edit Account
             </Button>
