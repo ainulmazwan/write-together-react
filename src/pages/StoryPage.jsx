@@ -60,7 +60,7 @@ const StoryPage = () => {
 
   useEffect(() => {
     // advance round if past deadline & status is not completed
-    if (story.status !== "completed" && story?.currentRound?.deadline) {
+    if (story?.status !== "completed" && story?.currentRound?.deadline) {
       const now = new Date();
       const deadline = new Date(story.currentRound.deadline);
 
