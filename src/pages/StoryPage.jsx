@@ -59,40 +59,35 @@ const StoryPage = () => {
   }, [id]);
 
   useEffect(() => {
-    // advance round if past deadline
-    if (!story?.currentRound?.deadline) {
-      return;
-    }
+    // advance round if past deadline & status is not completed
+    if (story.status !== "completed" && story?.currentRound?.deadline) {
+      const now = new Date();
+      const deadline = new Date(story.currentRound.deadline);
 
-    const now = new Date();
-    const deadline = new Date(story.currentRound.deadline);
-
-    if (now > deadline) {
-      const handleAdvance = async () => {
-        try {
-          await advanceRound(id);
-          const updatedStory = await getStoryById(story._id);
-          const updatedSubs = await getSubmissionsForCurrentRound(story._id);
-          setStory(updatedStory);
-          setSubmissions(updatedSubs);
-        } catch (error) {
-          console.error(error);
-        }
-      };
-      handleAdvance();
+      if (now > deadline) {
+        const handleAdvance = async () => {
+          try {
+            await advanceRound(id);
+            const updatedStory = await getStoryById(story._id);
+            const updatedSubs = await getSubmissionsForCurrentRound(story._id);
+            setStory(updatedStory);
+            setSubmissions(updatedSubs);
+          } catch (error) {
+            console.error(error);
+          }
+        };
+        handleAdvance();
+      }
     }
 
     // check if story is favourited by logged in user
-    if (!currentuser) {
-      return;
+    if (currentuser) {
+      getUserById(currentuser._id).then((data) => {
+        if (data.favourites.includes(id)) {
+          setIsFavourited(true);
+        }
+      });
     }
-
-    getUserById(currentuser._id).then((data) => {
-      console.log(data.favourites);
-      if (data.favourites.includes(id)) {
-        setIsFavourited(true);
-      }
-    });
   }, [story, currentuser]);
 
   // check if user currently has a submission for story
