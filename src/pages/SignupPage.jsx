@@ -69,6 +69,7 @@ const SignupPage = () => {
                 label="Name"
                 fullWidth
                 value={name}
+                slotProps={{ htmlInput: { maxLength: 30 } }}
                 onChange={(e) => {
                   setName(e.target.value);
                 }}

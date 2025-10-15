@@ -73,6 +73,7 @@ const ChapterUpdate = () => {
           rows={12}
           variant="outlined"
           placeholder="Write your chapter submission here..."
+          slotProps={{ htmlInput: { maxLength: 25000 } }}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           sx={{ mt: 2 }}

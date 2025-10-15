@@ -48,12 +48,12 @@ const StoryAdd = () => {
 
   const handleSubmit = async () => {
     if (
-      !title ||
+      !title.trim() ||
       !genre ||
       !publishDate ||
       !votingWindow ||
-      !description ||
-      !chapterContent
+      !description.trim() ||
+      !chapterContent.trim()
     ) {
       toast.error("Please fill in all the fields.");
       return;
@@ -111,6 +111,8 @@ const StoryAdd = () => {
               label="Title"
               fullWidth
               value={title}
+              maxLength={60}
+              slotProps={{ htmlInput: { maxLength: 30 } }}
               onChange={(e) => setTitle(e.target.value)}
             />
 
@@ -144,7 +146,7 @@ const StoryAdd = () => {
             <TextField
               label="Voting Window (days)"
               type="number"
-              inputProps={{ min: 1 }}
+              inputProps={{ min: 1, max: 14 }}
               fullWidth
               value={votingWindow}
               onChange={(e) => setVotingWindow(e.target.value)}
@@ -154,8 +156,9 @@ const StoryAdd = () => {
               label="Description"
               fullWidth
               multiline
-              rows={3}
+              rows={5}
               value={description}
+              slotProps={{ htmlInput: { maxLength: 500 } }}
               onChange={(e) => setDescription(e.target.value)}
             />
 
@@ -163,8 +166,9 @@ const StoryAdd = () => {
               label="Chapter 1 Content"
               fullWidth
               multiline
-              rows={10}
+              rows={15}
               value={chapterContent}
+              slotProps={{ htmlInput: { maxLength: 25000 } }}
               onChange={(e) => setChapterContent(e.target.value)}
             />
 

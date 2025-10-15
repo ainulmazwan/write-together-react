@@ -52,6 +52,9 @@ const GenresPage = () => {
       cancelButtonText: "Cancel",
       confirmButtonColor: "#1976d2",
       cancelButtonColor: "#9e9e9e",
+      inputAttributes: {
+        maxlength: 20,
+      },
       inputValidator: (value) => {
         if (!value.trim()) {
           return "Please enter a genre name.";
@@ -81,6 +84,9 @@ const GenresPage = () => {
       cancelButtonText: "Cancel",
       confirmButtonColor: "#1976d2",
       cancelButtonColor: "#9e9e9e",
+      inputAttributes: {
+        maxlength: 20,
+      },
       inputValidator: (value) => {
         if (!value.trim()) {
           return "Please enter updated genre name.";

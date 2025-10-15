@@ -127,7 +127,7 @@ const ChapterPage = () => {
             Original story, {story.title}, by {story.author.name}
           </Typography>
           {currentuser?.role === "admin" ||
-          currentuser?._id === chapter.author._id ? (
+          (currentuser?._id === chapter.author._id && !chapter.isOfficial) ? (
             <Box sx={{ marginTop: 2 }}>
               <Button
                 variant="outlined"

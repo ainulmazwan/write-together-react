@@ -30,7 +30,7 @@ const StoriesPage = () => {
   // fetch stories
   useEffect(() => {
     const fetchStories = async () => {
-      const data = await getStories(genre, status, search, sortBy);
+      const data = await getStories(genre, status, search.trim(), sortBy);
       setStories(data);
     };
     fetchStories();
@@ -97,7 +97,7 @@ const StoriesPage = () => {
             onChange={(e) => {
               setSearch(e.target.value);
             }}
-            xs={{ minWidth: "500px" }}
+            sx={{ minWidth: "400px" }}
           />
           <Box>
             <TextField
