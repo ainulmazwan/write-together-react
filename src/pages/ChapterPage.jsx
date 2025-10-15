@@ -126,29 +126,37 @@ const ChapterPage = () => {
           <Typography variant="body2" color="text.secondary">
             Original story, {story.title}, by {story.author.name}
           </Typography>
-          {currentuser?.role === "admin" ||
-          (currentuser?._id === chapter.author._id && !chapter.isOfficial) ? (
-            <Box sx={{ marginTop: 2 }}>
-              <Button
-                variant="outlined"
-                color="primary"
-                sx={{ marginRight: 2 }}
-                component={Link}
-                to={`/stories/${story._id}/chapters/${chapter._id}/update`}
-              >
-                Edit <ModeIcon sx={{ marginLeft: 1 }} />
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() => {
-                  handleDeleteModal();
-                }}
-              >
-                Delete <DeleteIcon sx={{ fontSize: "1.2rem", marginLeft: 1 }} />
-              </Button>
-            </Box>
-          ) : null}
+          <Box sx={{ display: "flex", justifyContent: "center", marginTop: 2 }}>
+            {(currentuser?.role === "admin" ||
+              (currentuser?._id === chapter.author._id &&
+                !chapter.isOfficial)) && (
+              <Box>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  sx={{ marginRight: 2 }}
+                  component={Link}
+                  to={`/stories/${story._id}/chapters/${chapter._id}/update`}
+                >
+                  Edit <ModeIcon sx={{ marginLeft: 1 }} />
+                </Button>
+              </Box>
+            )}
+
+            {(currentuser?.role === "admin" ||
+              currentuser?._id === chapter.author._id) && (
+              <Box>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleDeleteModal}
+                >
+                  Delete{" "}
+                  <DeleteIcon sx={{ fontSize: "1.2rem", marginLeft: 1 }} />
+                </Button>
+              </Box>
+            )}
+          </Box>
         </Box>
 
         {/* chapter content */}
