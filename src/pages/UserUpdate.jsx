@@ -41,11 +41,11 @@ const UserUpdate = () => {
   const handleUpdate = async () => {
     const updates = { name };
     // include password if changed
-    if (!name) {
+    if (!name.trim()) {
       toast.error("Please fill in the updated name");
       return;
     }
-    if (password) {
+    if (password.trim()) {
       updates.password = password;
     }
     try {

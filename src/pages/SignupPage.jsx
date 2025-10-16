@@ -31,7 +31,12 @@ const SignupPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSignup = async () => {
-    if (!name || !email || !password || !confirmPassword) {
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
       toast.error("Fill in all the fields");
     } else if (password !== confirmPassword) {
       toast.error("Passwords should match");

@@ -62,7 +62,7 @@ const StoryAdd = () => {
     try {
       const author = currentuser._id;
       const deadline = publishDate
-        .add(Number(votingWindow), "day")
+        .add(Number(votingWindow), "minute")
         .toISOString();
 
       const story = await addStory(

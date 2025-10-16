@@ -28,7 +28,7 @@ const LoginPage = () => {
   }, [currentuser]);
 
   const handleLogin = async () => {
-    if (!email || !password) {
+    if (!email.trim() || !password.trim()) {
       toast.error("Fill in all the fields");
     } else {
       try {
